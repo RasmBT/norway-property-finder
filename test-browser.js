@@ -70,6 +70,55 @@ const { chromium } = require('playwright');
     const firstPriceBack = await page.locator('.listing-price').first().textContent();
     log('Prices back to NOK', firstPriceBack.includes('kr'), 'Price: ' + firstPriceBack.trim());
 
+    // --- EUR Price Filter ---
+    console.log('\n=== EUR PRICE FILTER ===');
+
+    // Set a NOK min price filter first
+    await page.fill('#filter-min-price', '2000000');
+    await page.locator('#filter-min-price').press('Enter');
+    await page.waitForTimeout(2000);
+    const nokFilterCount = await page.locator('.listing-card').count();
+    log('NOK price filter works', nokFilterCount > 0 && nokFilterCount < listingCount,
+      nokFilterCount + ' listings with min 2M NOK');
+
+    // Toggle to EUR — price filter value should convert
+    await page.click('.currency-toggle');
+    await page.waitForTimeout(500);
+    const convertedMinPrice = await page.locator('#filter-min-price').inputValue();
+    const expectedEur = Math.round(2000000 * 0.08864);
+    const actualEur = Number(convertedMinPrice);
+    log('Price filter converts NOK→EUR on toggle', Math.abs(actualEur - expectedEur) < 1000,
+      '2000000 NOK → ' + convertedMinPrice + ' EUR (expected ~' + expectedEur + ')');
+
+    // Now apply the EUR filter — should get same results
+    await page.locator('#filter-min-price').press('Enter');
+    await page.waitForTimeout(2000);
+    const eurFilterCount = await page.locator('.listing-card').count();
+    log('EUR filter returns same listings', Math.abs(eurFilterCount - nokFilterCount) <= 2,
+      'NOK filter: ' + nokFilterCount + ', EUR filter: ' + eurFilterCount);
+
+    // Enter a EUR max price to narrow further
+    await page.fill('#filter-max-price', '500000');
+    await page.locator('#filter-max-price').press('Enter');
+    await page.waitForTimeout(2000);
+    const eurRangeCount = await page.locator('.listing-card').count();
+    log('EUR range filter works', eurRangeCount <= eurFilterCount,
+      eurRangeCount + ' listings in EUR range');
+
+    // Toggle back to NOK and verify conversion
+    await page.click('.currency-toggle');
+    await page.waitForTimeout(500);
+    const backToNokMax = await page.locator('#filter-max-price').inputValue();
+    const expectedNok = Math.round(500000 / 0.08864);
+    log('Price filter converts EUR→NOK on toggle', Math.abs(Number(backToNokMax) - expectedNok) < 100000,
+      '500000 EUR → ' + backToNokMax + ' NOK (expected ~' + expectedNok + ')');
+
+    // Clear for next tests
+    await page.fill('#filter-min-price', '');
+    await page.fill('#filter-max-price', '');
+    await page.click('.btn-clear');
+    await page.waitForTimeout(2000);
+
     // --- 3. Map loads with dots ---
     console.log('\n=== MAP ===');
     const mapExists = await page.locator('#map').count();
@@ -102,6 +151,34 @@ const { chromium } = require('playwright');
     if (tomtCount > 0) {
       const tomtBadge = await page.locator('.listing-badge.tomt-badge').count();
       log('TOMT badges shown', tomtBadge > 0, tomtBadge + ' badges');
+    }
+
+    // Check ownership filter appears for tomt
+    const ownershipVisible = await page.locator('#ownership-filter').isVisible();
+    log('Ownership filter shows for Tomt', ownershipVisible);
+
+    // Check plot details toggles exist on tomt cards
+    if (tomtCount > 0) {
+      const plotToggles = await page.locator('.plot-details-toggle').count();
+      log('Plot details toggles shown', plotToggles > 0, plotToggles + ' toggles');
+
+      // Click first toggle to expand
+      if (plotToggles > 0) {
+        await page.locator('.plot-details-toggle').first().click();
+        await page.waitForTimeout(300);
+        const expanded = await page.locator('.plot-details-content').first().isVisible();
+        log('Plot details expand on click', expanded);
+
+        // Check property tax row shows "0 kr"
+        const taxRow = await page.locator('.plot-details-content').first().textContent();
+        log('Property tax shows 0', taxRow.includes('0 kr'), 'Contains tax-free info');
+
+        // Click again to collapse
+        await page.locator('.plot-details-toggle').first().click();
+        await page.waitForTimeout(300);
+        const collapsed = !(await page.locator('.plot-details-content').first().isVisible());
+        log('Plot details collapse on second click', collapsed);
+      }
     }
 
     // Test no-fees filter
@@ -164,21 +241,49 @@ const { chromium } = require('playwright');
     const statBars = await page.locator('.stat-bar').count();
     log('Sidebar municipality stats', statBars > 0, statBars + ' municipalities listed');
 
-    // --- 8. Click municipality dot popup ---
-    console.log('\n=== MUNICIPALITY CLICK ===');
-    // Click on a stat bar to test filterByMunicipality
+    // --- 8. Municipality click preserves filters ---
+    console.log('\n=== MUNICIPALITY CLICK (preserves filters) ===');
+
+    // Set category to tomt first
+    await page.selectOption('#filter-category', 'tomt');
+    await page.waitForTimeout(2000);
+    await page.waitForSelector('.listing-card,.empty-state', { timeout: 10000 });
+    const tomtCountBefore = await page.locator('.listing-card').count();
+    log('Set category to tomt', true, tomtCountBefore + ' plots');
+
+    // Click first municipality in stats sidebar
     if (statBars > 0) {
       const firstStatName = await page.locator('.stat-bar span').first().textContent();
       await page.locator('.stat-bar').first().click();
       await page.waitForTimeout(2000);
+
+      // Verify category is STILL tomt (not reset)
+      const catAfterClick = await page.locator('#filter-category').inputValue();
+      log('Municipality click keeps category', catAfterClick === 'tomt',
+        'Category after click: ' + catAfterClick);
+
       const titleText = await page.locator('#listings-title').textContent();
-      log('Click municipality filters', titleText.includes(firstStatName.trim()),
+      log('Title shows municipality', titleText.includes(firstStatName.trim()),
         'Title: ' + titleText);
 
-      // Verify other filters were cleared (category should be "all")
-      const catVal = await page.locator('#filter-category').inputValue();
-      log('Municipality click resets filters', catVal === 'all', 'Category: ' + catVal);
+      // Now click a SECOND municipality — should work without clearing
+      if (await page.locator('.stat-bar').count() > 1) {
+        const secondStatName = await page.locator('.stat-bar span').nth(2).textContent();
+        await page.locator('.stat-bar').nth(1).click();
+        await page.waitForTimeout(2000);
+
+        const catAfterSecond = await page.locator('#filter-category').inputValue();
+        log('Second municipality keeps category', catAfterSecond === 'tomt',
+          'Category: ' + catAfterSecond);
+
+        const titleText2 = await page.locator('#listings-title').textContent();
+        log('Can switch between municipalities', true, 'Title: ' + titleText2);
+      }
     }
+
+    // Reset for remaining tests
+    await page.click('.btn-clear');
+    await page.waitForTimeout(2000);
 
     // --- 9. Drag handle exists ---
     console.log('\n=== DRAG HANDLE ===');

@@ -63,8 +63,28 @@ try {
   db.exec("ALTER TABLE listings ADD COLUMN building_obligation_text TEXT DEFAULT NULL");
 }
 
+// Migration: enhanced plot detail columns
+const plotDetailCols = [
+  { name: 'plot_owned', def: 'TEXT DEFAULT NULL' },
+  { name: 'total_price', def: 'INTEGER DEFAULT NULL' },
+  { name: 'tax_value', def: 'INTEGER DEFAULT NULL' },
+  { name: 'cadastre', def: 'TEXT DEFAULT NULL' },
+  { name: 'facilities', def: 'TEXT DEFAULT NULL' },
+  { name: 'regulations', def: 'TEXT DEFAULT NULL' },
+  { name: 'yearly_costs_text', def: 'TEXT DEFAULT NULL' },
+  { name: 'utilities', def: 'TEXT DEFAULT NULL' },
+];
+for (const col of plotDetailCols) {
+  try {
+    db.prepare(`SELECT ${col.name} FROM listings LIMIT 1`).get();
+  } catch (e) {
+    db.exec(`ALTER TABLE listings ADD COLUMN ${col.name} ${col.def}`);
+  }
+}
+
 db.exec("CREATE INDEX IF NOT EXISTS idx_listings_category ON listings(category)");
 db.exec("CREATE INDEX IF NOT EXISTS idx_listings_obligation ON listings(building_obligation)");
+db.exec("CREATE INDEX IF NOT EXISTS idx_listings_plot_owned ON listings(plot_owned)");
 
 // Refresh status tracking
 let isRefreshing = false;
@@ -109,7 +129,7 @@ app.get('/api/exchange-rate', async (req, res) => {
 
 // API: Get listings with filters
 app.get('/api/listings', (req, res) => {
-  const { municipality, min_price, max_price, min_area, property_type, sort, new_only, category, developed, building_obligation } = req.query;
+  const { municipality, min_price, max_price, min_area, property_type, sort, new_only, category, developed, building_obligation, plot_owned } = req.query;
 
   let sql = 'SELECT * FROM listings WHERE 1=1';
   const params = [];
@@ -152,6 +172,10 @@ app.get('/api/listings', (req, res) => {
   if (building_obligation && building_obligation !== 'all') {
     sql += ' AND building_obligation = ?';
     params.push(building_obligation);
+  }
+  if (plot_owned) {
+    sql += ' AND plot_owned = ?';
+    params.push(plot_owned);
   }
 
   switch (sort) {
@@ -212,8 +236,10 @@ function upsertListings(municipalityCode, municipalityName, listings) {
   const upsert = db.prepare(`
     INSERT INTO listings (id, municipality_code, municipality_name, title, price, price_text,
       address, area_m2, bedrooms, property_type, image_url, finn_url, latitude, longitude,
-      shared_cost, shared_debt, category, is_developed, building_obligation, building_obligation_text, last_seen)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
+      shared_cost, shared_debt, category, is_developed, building_obligation, building_obligation_text,
+      plot_owned, total_price, tax_value, cadastre, facilities, regulations, yearly_costs_text, utilities,
+      last_seen)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
     ON CONFLICT(id) DO UPDATE SET
       price = excluded.price,
       price_text = excluded.price_text,
@@ -225,6 +251,14 @@ function upsertListings(municipalityCode, municipalityName, listings) {
       is_developed = excluded.is_developed,
       building_obligation = excluded.building_obligation,
       building_obligation_text = excluded.building_obligation_text,
+      plot_owned = excluded.plot_owned,
+      total_price = excluded.total_price,
+      tax_value = excluded.tax_value,
+      cadastre = excluded.cadastre,
+      facilities = excluded.facilities,
+      regulations = excluded.regulations,
+      yearly_costs_text = excluded.yearly_costs_text,
+      utilities = excluded.utilities,
       last_seen = datetime('now'),
       is_new = 0
   `);
@@ -255,7 +289,15 @@ function upsertListings(municipalityCode, municipalityName, listings) {
         listing.category || 'home',
         listing.isDeveloped ?? null,
         listing.buildingObligation || 'unknown',
-        listing.buildingObligationText || null
+        listing.buildingObligationText || null,
+        listing.plotOwned || null,
+        listing.totalPrice || null,
+        listing.taxValue || null,
+        listing.cadastre || null,
+        listing.facilities || null,
+        listing.regulations || null,
+        listing.yearlyCostsText || null,
+        listing.utilities || null
       );
     }
   });

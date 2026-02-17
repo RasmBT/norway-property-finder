@@ -30,6 +30,7 @@ async function loadExchangeRate() {
 
 function toggleCurrency() {
   try {
+    var wasCurrency = currency;
     currency = currency === 'NOK' ? 'EUR' : 'NOK';
     document.title = 'Norway Property Finder (' + currency + ')';
 
@@ -40,6 +41,20 @@ function toggleCurrency() {
 
     var minPrice = document.getElementById('filter-min-price');
     var maxPrice = document.getElementById('filter-max-price');
+
+    // Convert existing price filter values to the new currency
+    if (eurRate) {
+      if (wasCurrency === 'NOK' && currency === 'EUR') {
+        // NOK → EUR
+        if (minPrice.value) minPrice.value = Math.round(Number(minPrice.value) * eurRate);
+        if (maxPrice.value) maxPrice.value = Math.round(Number(maxPrice.value) * eurRate);
+      } else if (wasCurrency === 'EUR' && currency === 'NOK') {
+        // EUR → NOK
+        if (minPrice.value) minPrice.value = Math.round(Number(minPrice.value) / eurRate);
+        if (maxPrice.value) maxPrice.value = Math.round(Number(maxPrice.value) / eurRate);
+      }
+    }
+
     if (currency === 'EUR') {
       minPrice.placeholder = 'Min (\u20ac)';
       maxPrice.placeholder = 'Max (\u20ac)';
@@ -161,6 +176,7 @@ function hasActiveFilters() {
   if (document.getElementById('filter-category').value !== 'home') return true;
   if (document.getElementById('filter-developed').value !== '') return true;
   if (document.getElementById('filter-obligation').value !== 'all') return true;
+  if (document.getElementById('filter-ownership').value !== '') return true;
   return false;
 }
 
@@ -240,21 +256,7 @@ function toggleTaxMunicipalities() {
 }
 
 function filterByMunicipality(code) {
-  // Reset all filters, then set just the municipality
-  document.getElementById('filter-min-price').value = '';
-  document.getElementById('filter-max-price').value = '';
-  document.getElementById('filter-min-area').value = '';
-  document.getElementById('filter-property-type').value = '';
-  document.getElementById('filter-sort').value = 'newest';
-  document.getElementById('filter-new-only').checked = false;
-  document.getElementById('filter-category').value = 'all';
-  document.getElementById('filter-developed').value = '';
-  document.getElementById('filter-obligation').value = 'all';
-  document.getElementById('developed-filter').style.display = 'none';
-  document.getElementById('obligation-filter').style.display = 'none';
-  var noFees = document.getElementById('filter-no-fees');
-  if (noFees) noFees.checked = false;
-
+  // Only change municipality — keep all other filters (category, price, etc.) intact
   document.getElementById('filter-municipality').value = code;
   applyFilters();
   document.querySelector('.listings-header').scrollIntoView({ behavior: 'smooth' });
@@ -386,6 +388,12 @@ function renderListings(items) {
     if (isTomt && listing.is_developed === 1) badges += '<span class="listing-badge developed-badge">Developed</span>';
     if (isTomt && listing.is_developed === 0) badges += '<span class="listing-badge undeveloped-badge">Undeveloped</span>';
 
+    if (isTomt && listing.plot_owned === 'selveier') {
+      badges += '<span class="listing-badge ownership-selveier">Selveier</span>';
+    } else if (isTomt && listing.plot_owned === 'tomtefeste') {
+      badges += '<span class="listing-badge ownership-tomtefeste">Tomtefeste</span>';
+    }
+
     if (isTomt && obl === 'none') {
       badges += '<span class="listing-badge obligation-none" title="No byggeklausul detected">No obligation</span>';
     } else if (isTomt && obl === 'has_clause') {
@@ -418,6 +426,36 @@ function renderListings(items) {
       obligationHint = '<div class="listing-obligation-hint">"...' + escapeHtml(listing.building_obligation_text) + '..."</div>';
     }
 
+    // Total price line (when different from asking price)
+    var totalPriceHtml = '';
+    if (isTomt && listing.total_price && listing.total_price !== listing.price) {
+      totalPriceHtml = '<div class="listing-total-price">Total incl. costs: ' + formatPrice(listing.total_price) + '</div>';
+    }
+
+    // Expandable plot details section
+    var plotDetailsHtml = '';
+    if (isTomt) {
+      var detailRows = [];
+      if (listing.cadastre) detailRows.push('<div class="plot-detail-row"><span class="plot-detail-label">Cadastre</span><span>' + escapeHtml(listing.cadastre) + '</span></div>');
+      if (listing.plot_owned) detailRows.push('<div class="plot-detail-row"><span class="plot-detail-label">Ownership</span><span>' + escapeHtml(listing.plot_owned === 'selveier' ? 'Selveier (freehold)' : 'Tomtefeste (leasehold)') + '</span></div>');
+      if (listing.tax_value) detailRows.push('<div class="plot-detail-row"><span class="plot-detail-label">Tax value</span><span>' + formatPrice(listing.tax_value) + '</span></div>');
+      if (listing.facilities) detailRows.push('<div class="plot-detail-row"><span class="plot-detail-label">Facilities</span><span>' + escapeHtml(listing.facilities) + '</span></div>');
+      if (listing.utilities) detailRows.push('<div class="plot-detail-row"><span class="plot-detail-label">Utilities</span><span class="plot-detail-text">' + escapeHtml(listing.utilities) + '</span></div>');
+      if (listing.regulations) detailRows.push('<div class="plot-detail-row"><span class="plot-detail-label">Zoning</span><span class="plot-detail-text">' + escapeHtml(listing.regulations) + '</span></div>');
+      if (listing.yearly_costs_text) {
+        detailRows.push('<div class="plot-detail-row"><span class="plot-detail-label">Yearly costs</span><span class="plot-detail-text">' + escapeHtml(listing.yearly_costs_text) + '</span></div>');
+      } else {
+        detailRows.push('<div class="plot-detail-row"><span class="plot-detail-label">Yearly costs</span><span class="plot-detail-muted">Not specified — check with municipality</span></div>');
+      }
+      detailRows.push('<div class="plot-detail-row"><span class="plot-detail-label">Property tax</span><span style="color:var(--green)">0 kr (tax-free municipality)</span></div>');
+
+      if (detailRows.length > 1) {
+        var cardId = 'plot-details-' + listing.id;
+        plotDetailsHtml = '<div class="plot-details-toggle" onclick="event.preventDefault(); event.stopPropagation(); togglePlotDetails(\'' + cardId + '\', this)">Plot details &#9662;</div>' +
+          '<div class="plot-details-content" id="' + cardId + '" style="display:none">' + detailRows.join('') + '</div>';
+      }
+    }
+
     return '<a class="listing-card' + (listing.is_new ? ' is-new' : '') + '" href="' + listing.finn_url + '" target="_blank" rel="noopener">' +
       imgHtml +
       '<div class="listing-body">' +
@@ -426,9 +464,10 @@ function renderListings(items) {
         '<div class="listing-address">' + escapeHtml(listing.address) + '</div>' +
         obligationHint +
         '<div class="listing-details">' +
-          '<div class="listing-price">' + priceHtml + '</div>' +
+          '<div class="listing-price">' + priceHtml + totalPriceHtml + '</div>' +
           '<div class="listing-meta">' + metaParts.join('') + '</div>' +
         '</div>' +
+        plotDetailsHtml +
       '</div></a>';
   }).join('');
 }
@@ -449,6 +488,7 @@ function buildFilterParams() {
   var category = document.getElementById('filter-category').value;
   var developed = document.getElementById('filter-developed').value;
   var obligation = document.getElementById('filter-obligation').value;
+  var ownership = document.getElementById('filter-ownership').value;
 
   if (municipality) params.set('municipality', municipality);
   if (minPrice) {
@@ -469,6 +509,7 @@ function buildFilterParams() {
   if (category && category !== 'all') params.set('category', category);
   if (developed) params.set('developed', developed);
   if (obligation && obligation !== 'all') params.set('building_obligation', obligation);
+  if (ownership) params.set('plot_owned', ownership);
 
   return params.toString();
 }
@@ -478,9 +519,11 @@ function onCategoryChange() {
   var isTomt = category === 'tomt';
   document.getElementById('developed-filter').style.display = isTomt ? 'block' : 'none';
   document.getElementById('obligation-filter').style.display = isTomt ? 'block' : 'none';
+  document.getElementById('ownership-filter').style.display = isTomt ? 'block' : 'none';
   if (!isTomt) {
     document.getElementById('filter-developed').value = '';
     document.getElementById('filter-obligation').value = 'all';
+    document.getElementById('filter-ownership').value = '';
   }
   applyFilters();
 }
@@ -517,8 +560,10 @@ function clearFilters() {
   document.getElementById('filter-category').value = 'home';
   document.getElementById('filter-developed').value = '';
   document.getElementById('filter-obligation').value = 'all';
+  document.getElementById('filter-ownership').value = '';
   document.getElementById('developed-filter').style.display = 'none';
   document.getElementById('obligation-filter').style.display = 'none';
+  document.getElementById('ownership-filter').style.display = 'none';
   var noFees = document.getElementById('filter-no-fees');
   if (noFees) noFees.checked = false;
   document.getElementById('listings-title').textContent = 'Properties in Tax-Free Municipalities';
@@ -571,6 +616,15 @@ async function triggerRefresh() {
     console.error('Refresh failed:', err);
     btn.classList.remove('spinning');
   }
+}
+
+// --- PLOT DETAILS TOGGLE ---
+function togglePlotDetails(id, toggleEl) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  var isHidden = el.style.display === 'none';
+  el.style.display = isHidden ? 'block' : 'none';
+  toggleEl.innerHTML = isHidden ? 'Plot details &#9652;' : 'Plot details &#9662;';
 }
 
 // --- UTILITIES ---

@@ -70,12 +70,20 @@ async function fetchPlotsForMunicipality(municipality) {
   try {
     const plots = await scrapeAllPages(url, municipality, hasLocationFilter, 'tomt');
 
-    // Fetch detail pages for byggeplikt detection
+    // Fetch detail pages for enhanced plot info
     for (let i = 0; i < plots.length; i++) {
       try {
-        const details = await fetchBuildingObligation(plots[i].finnUrl);
-        plots[i].buildingObligation = details.obligation;
-        plots[i].buildingObligationText = details.text;
+        const details = await fetchPlotDetails(plots[i].finnUrl);
+        plots[i].buildingObligation = details.buildingObligation;
+        plots[i].buildingObligationText = details.buildingObligationText;
+        plots[i].plotOwned = details.plotOwned;
+        plots[i].totalPrice = details.totalPrice;
+        plots[i].taxValue = details.taxValue;
+        plots[i].cadastre = details.cadastre;
+        plots[i].facilities = details.facilities;
+        plots[i].regulations = details.regulations;
+        plots[i].yearlyCostsText = details.yearlyCostsText;
+        plots[i].utilities = details.utilities;
       } catch (err) {
         plots[i].buildingObligation = 'unknown';
         plots[i].buildingObligationText = null;
@@ -253,10 +261,77 @@ const HAS_DEADLINE_PATTERNS = [
   'plikt til å bebygge',
 ];
 
+// --- TEXT HELPERS ---
+
+function stripHtml(html) {
+  if (!html) return '';
+  return html.replace(/<[^>]+>/g, ' ').replace(/&[^;]+;/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
+function truncate(str, maxLen) {
+  if (!str || str.length <= maxLen) return str;
+  return str.substring(0, maxLen) + '...';
+}
+
 /**
- * Fetch a plot's detail page and detect building obligation
+ * Find a text section by heading pattern — checks both agent format (generalText)
+ * and FSBO format (propertyInfo), returns stripped text or null
  */
-async function fetchBuildingObligation(finnUrl) {
+function findTextSection(ad, pattern) {
+  // Agent format: generalText[].heading + textUnsafe
+  if (Array.isArray(ad.generalText)) {
+    for (const section of ad.generalText) {
+      const heading = (section.heading || '').toLowerCase();
+      if (heading.includes(pattern)) {
+        return stripHtml(section.textUnsafe);
+      }
+    }
+  }
+  // FSBO format: propertyInfo[].title + content
+  if (Array.isArray(ad.propertyInfo)) {
+    for (const section of ad.propertyInfo) {
+      const title = (section.title || '').toLowerCase();
+      if (title.includes(pattern)) {
+        return stripHtml(section.content || section.text || '');
+      }
+    }
+  }
+  return null;
+}
+
+/**
+ * Collect all text from ad for keyword searching
+ */
+function collectAllText(ad) {
+  const parts = [];
+  if (ad.title) parts.push(ad.title);
+  if (ad.regulations) parts.push(stripHtml(ad.regulations));
+  if (Array.isArray(ad.generalText)) {
+    for (const s of ad.generalText) {
+      if (s.textUnsafe) parts.push(stripHtml(s.textUnsafe));
+    }
+  }
+  if (Array.isArray(ad.propertyInfo)) {
+    for (const s of ad.propertyInfo) {
+      if (s.content) parts.push(stripHtml(s.content));
+    }
+  }
+  return parts.join(' ').toLowerCase();
+}
+
+// --- PLOT DETAIL EXTRACTION ---
+
+/**
+ * Fetch a plot's detail page and extract all useful info
+ */
+async function fetchPlotDetails(finnUrl) {
+  const defaults = {
+    buildingObligation: 'unknown', buildingObligationText: null,
+    plotOwned: null, totalPrice: null, taxValue: null,
+    cadastre: null, facilities: null, regulations: null,
+    yearlyCostsText: null, utilities: null,
+  };
+
   const resp = await fetch(finnUrl, {
     headers: {
       'User-Agent': USER_AGENT,
@@ -265,48 +340,79 @@ async function fetchBuildingObligation(finnUrl) {
     },
   });
 
-  if (!resp.ok) {
-    return { obligation: 'unknown', text: null };
-  }
+  if (!resp.ok) return defaults;
 
   const html = await resp.text();
-
   const contextMatch = html.match(/window\.__remixContext\s*=\s*({.*?});\s*<\/script>/s);
-  if (!contextMatch) {
-    return { obligation: 'unknown', text: null };
-  }
+  if (!contextMatch) return defaults;
 
   let data;
   try {
     data = JSON.parse(contextMatch[1]);
   } catch (e) {
-    return { obligation: 'unknown', text: null };
+    return defaults;
   }
 
-  // Find the ad data in the detail page structure
   const ad = findAdData(data);
-  if (!ad) {
-    return { obligation: 'unknown', text: null };
+  if (!ad) return defaults;
+
+  // Extract all fields
+  const details = {};
+
+  // 1. Ownership (selveier vs tomtefeste)
+  if (ad.plot && typeof ad.plot.owned === 'boolean') {
+    details.plotOwned = ad.plot.owned ? 'selveier' : 'tomtefeste';
+  } else {
+    details.plotOwned = null;
   }
 
-  // Collect all text from title + generalText sections
-  const textParts = [];
-  if (ad.title) textParts.push(ad.title);
+  // 2. Total price incl. omkostninger
+  details.totalPrice = (ad.price && typeof ad.price.total === 'number') ? ad.price.total : null;
 
-  if (ad.generalText && Array.isArray(ad.generalText)) {
-    for (const section of ad.generalText) {
-      if (section.textUnsafe) {
-        // Strip HTML tags
-        const clean = section.textUnsafe.replace(/<[^>]+>/g, ' ').replace(/&[^;]+;/g, ' ');
-        textParts.push(clean);
-      }
-    }
+  // 3. Tax assessed value (formuesverdi)
+  details.taxValue = (ad.price && typeof ad.price.taxValue === 'number') ? ad.price.taxValue : null;
+
+  // 4. Cadastre (gnr/bnr)
+  if (Array.isArray(ad.cadastres) && ad.cadastres.length > 0) {
+    const c = ad.cadastres[0];
+    details.cadastre = `gnr. ${c.landNumber} bnr. ${c.titleNumber}`;
+  } else {
+    details.cadastre = null;
   }
 
-  const fullText = textParts.join(' ').toLowerCase();
+  // 5. Facilities
+  if (Array.isArray(ad.facilities) && ad.facilities.length > 0) {
+    details.facilities = ad.facilities.join(', ');
+  } else {
+    details.facilities = null;
+  }
 
-  // Classify building obligation
-  return classifyObligation(fullText);
+  // 6. Regulations/zoning
+  let regs = findTextSection(ad, 'regulering');
+  if (!regs && ad.regulations && typeof ad.regulations === 'string') {
+    regs = stripHtml(ad.regulations);
+  }
+  details.regulations = regs ? truncate(regs, 500) : null;
+
+  // 7. Yearly running costs
+  let costs = findTextSection(ad, 'andre faste');
+  if (!costs) costs = findTextSection(ad, 'løpende kostnader');
+  if (!costs) costs = findTextSection(ad, 'kommunale avgifter');
+  details.yearlyCostsText = costs ? truncate(costs, 500) : null;
+
+  // 8. Utilities (vei/vann/avlop)
+  let utils = findTextSection(ad, 'vei / vann');
+  if (!utils) utils = findTextSection(ad, 'vann og avløp');
+  if (!utils) utils = findTextSection(ad, 'infrastruktur');
+  details.utilities = utils ? truncate(utils, 300) : null;
+
+  // 9. Building obligation (existing keyword analysis)
+  const fullText = collectAllText(ad);
+  const oblResult = classifyObligation(fullText);
+  details.buildingObligation = oblResult.obligation;
+  details.buildingObligationText = oblResult.text;
+
+  return details;
 }
 
 /**

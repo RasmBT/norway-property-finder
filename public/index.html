@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/style.css?v=3">
+  <link rel="stylesheet" href="/style.css?v=6">
   <meta http-equiv="cache-control" content="no-cache">
 </head>
 <body>
@@ -99,6 +99,15 @@
           </p>
         </div>
 
+        <div class="filter-section" id="ownership-filter" style="display:none">
+          <h3>Ownership</h3>
+          <select id="filter-ownership" onchange="applyFilters()">
+            <option value="">All</option>
+            <option value="selveier">Selveier (Freehold)</option>
+            <option value="tomtefeste">Tomtefeste (Leasehold)</option>
+          </select>
+        </div>
+
         <div class="filter-section">
           <h3>Property Type</h3>
           <select id="filter-property-type" onchange="applyFilters()">
@@ -175,6 +184,6 @@
   </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="/app.js?v=3"></script>
+  <script src="/app.js?v=6"></script>
 </body>
 </html>
