@@ -262,6 +262,11 @@ body {
   color: var(--accent);
 }
 
+.stat-bar.selected {
+  color: var(--accent);
+  font-weight: 600;
+}
+
 .stat-bar .count {
   color: var(--text-muted);
   font-size: 12px;

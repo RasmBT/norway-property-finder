@@ -330,15 +330,32 @@ async function loadLastUpdate() {
   }
 }
 
-// Compute header stats + sidebar stats from the filtered listings array
-function updateStats() {
+// Compute header stats from filtered listings, sidebar stats from non-municipality-filtered data
+async function updateStats() {
   var total = listings.length;
   var newCount = 0;
-  var byCounts = {};
-  var byNames = {};
 
   listings.forEach(function(l) {
     if (l.is_new) newCount++;
+  });
+
+  document.getElementById('total-count').textContent = total;
+  document.getElementById('new-count').textContent = newCount;
+
+  // Sidebar stats: fetch WITHOUT municipality filter so all municipalities are always clickable
+  var statsParams = buildFilterParams();
+  var p = new URLSearchParams(statsParams);
+  p.delete('municipality');
+  try {
+    var resp = await fetch('/api/listings?' + p.toString());
+    var statsListings = await resp.json();
+  } catch (e) {
+    return;
+  }
+
+  var byCounts = {};
+  var byNames = {};
+  statsListings.forEach(function(l) {
     if (!byCounts[l.municipality_code]) {
       byCounts[l.municipality_code] = 0;
       byNames[l.municipality_code] = l.municipality_name;
@@ -346,8 +363,7 @@ function updateStats() {
     byCounts[l.municipality_code]++;
   });
 
-  document.getElementById('total-count').textContent = total;
-  document.getElementById('new-count').textContent = newCount;
+  var selectedMuni = document.getElementById('filter-municipality').value;
 
   var sorted = Object.keys(byCounts).map(function(code) {
     return { code: code, name: byNames[code], count: byCounts[code] };
@@ -355,7 +371,8 @@ function updateStats() {
 
   var statsList = document.getElementById('stats-list');
   statsList.innerHTML = sorted.map(function(s) {
-    return '<div class="stat-bar" onclick="filterByMunicipality(\'' + s.code + '\')">' +
+    var isSelected = s.code === selectedMuni;
+    return '<div class="stat-bar' + (isSelected ? ' selected' : '') + '" onclick="filterByMunicipality(\'' + s.code + '\')">' +
       '<span>' + escapeHtml(s.name) + '</span>' +
       '<span class="count">' + s.count + '</span></div>';
   }).join('');
@@ -447,7 +464,8 @@ function renderListings(items) {
       } else {
         detailRows.push('<div class="plot-detail-row"><span class="plot-detail-label">Yearly costs</span><span class="plot-detail-muted">Not specified — check with municipality</span></div>');
       }
-      detailRows.push('<div class="plot-detail-row"><span class="plot-detail-label">Property tax</span><span style="color:var(--green)">0 kr (tax-free municipality)</span></div>');
+      var zeroPrice = currency === 'EUR' ? '\u20ac0' : '0 kr';
+      detailRows.push('<div class="plot-detail-row"><span class="plot-detail-label">Property tax</span><span style="color:var(--green)">' + zeroPrice + ' (tax-free municipality)</span></div>');
 
       if (detailRows.length > 1) {
         var cardId = 'plot-details-' + listing.id;
