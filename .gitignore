@@ -1,0 +1,5 @@
+node_modules/
+data/listings.db
+data/listings.db-wal
+data/listings.db-shm
+.env

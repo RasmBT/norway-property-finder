@@ -1,0 +1,2501 @@
+[
+  {
+    "code": "4216",
+    "name": "Birkenes",
+    "hasPropertyTax": true,
+    "lat": 58.4385,
+    "lon": 8.188
+  },
+  {
+    "code": "5053",
+    "name": "Inderøy",
+    "hasPropertyTax": true,
+    "lat": 63.9095,
+    "lon": 11.2581
+  },
+  {
+    "code": "3440",
+    "name": "Øyer",
+    "hasPropertyTax": true,
+    "lat": 61.321,
+    "lon": 10.3928
+  },
+  {
+    "code": "4014",
+    "name": "Kragerø",
+    "hasPropertyTax": true,
+    "lat": 58.8714,
+    "lon": 9.3531
+  },
+  {
+    "code": "4226",
+    "name": "Hægebostad",
+    "hasPropertyTax": false,
+    "lat": 58.4584,
+    "lon": 7.2108
+  },
+  {
+    "code": "5514",
+    "name": "Ibestad",
+    "hasPropertyTax": true,
+    "lat": 68.877,
+    "lon": 17.2478
+  },
+  {
+    "code": "4020",
+    "name": "Midt-Telemark",
+    "hasPropertyTax": true,
+    "lat": 59.4271,
+    "lon": 9.1341
+  },
+  {
+    "code": "5614",
+    "name": "Loppa",
+    "hasPropertyTax": true,
+    "lat": 70.1984,
+    "lon": 21.9734
+  },
+  {
+    "code": "3416",
+    "name": "Eidskog",
+    "hasPropertyTax": true,
+    "lat": 59.9924,
+    "lon": 12.0332
+  },
+  {
+    "code": "5060",
+    "name": "Nærøysund",
+    "hasPropertyTax": true,
+    "lat": 64.9219,
+    "lon": 11.7554
+  },
+  {
+    "code": "4003",
+    "name": "Skien",
+    "hasPropertyTax": true,
+    "lat": 59.2551,
+    "lon": 9.4782
+  },
+  {
+    "code": "1134",
+    "name": "Suldal",
+    "hasPropertyTax": true,
+    "lat": 59.4765,
+    "lon": 6.5308
+  },
+  {
+    "code": "1121",
+    "name": "Time",
+    "hasPropertyTax": true,
+    "lat": 58.7122,
+    "lon": 5.7655
+  },
+  {
+    "code": "4639",
+    "name": "Vik",
+    "hasPropertyTax": true,
+    "lat": 61.0287,
+    "lon": 6.5308
+  },
+  {
+    "code": "4211",
+    "name": "Gjerstad",
+    "hasPropertyTax": true,
+    "lat": 58.8674,
+    "lon": 8.9648
+  },
+  {
+    "code": "3424",
+    "name": "Rendalen",
+    "hasPropertyTax": true,
+    "lat": 61.8507,
+    "lon": 11.1639
+  },
+  {
+    "code": "1812",
+    "name": "Sømna",
+    "hasPropertyTax": true,
+    "lat": 65.3289,
+    "lon": 12.23
+  },
+  {
+    "code": "3434",
+    "name": "Lom",
+    "hasPropertyTax": true,
+    "lat": 61.6987,
+    "lon": 8.5705
+  },
+  {
+    "code": "3403",
+    "name": "Hamar",
+    "hasPropertyTax": true,
+    "lat": 60.9086,
+    "lon": 11.1319
+  },
+  {
+    "code": "3414",
+    "name": "Nord-Odal",
+    "hasPropertyTax": true,
+    "lat": 60.4288,
+    "lon": 11.6078
+  },
+  {
+    "code": "5045",
+    "name": "Grong",
+    "hasPropertyTax": true,
+    "lat": 64.5392,
+    "lon": 12.4266
+  },
+  {
+    "code": "3433",
+    "name": "Skjåk",
+    "hasPropertyTax": true,
+    "lat": 61.9447,
+    "lon": 7.8244
+  },
+  {
+    "code": "3453",
+    "name": "Øystre Slidre",
+    "hasPropertyTax": true,
+    "lat": 61.2559,
+    "lon": 9.0249
+  },
+  {
+    "code": "1813",
+    "name": "Brønnøy",
+    "hasPropertyTax": true,
+    "lat": 65.4288,
+    "lon": 12.599
+  },
+  {
+    "code": "5036",
+    "name": "Frosta",
+    "hasPropertyTax": true,
+    "lat": 63.5939,
+    "lon": 10.7451
+  },
+  {
+    "code": "1515",
+    "name": "Herøy",
+    "hasPropertyTax": true,
+    "lat": 62.2664,
+    "lon": 5.7124
+  },
+  {
+    "code": "3401",
+    "name": "Kongsvinger",
+    "hasPropertyTax": true,
+    "lat": 60.2198,
+    "lon": 12.1559
+  },
+  {
+    "code": "5042",
+    "name": "Lierne",
+    "hasPropertyTax": true,
+    "lat": 64.4617,
+    "lon": 13.5421
+  },
+  {
+    "code": "4205",
+    "name": "Lindesnes",
+    "hasPropertyTax": true,
+    "lat": 58.1635,
+    "lon": 7.4322
+  },
+  {
+    "code": "4630",
+    "name": "Osterøy",
+    "hasPropertyTax": true,
+    "lat": 60.5647,
+    "lon": 5.5531
+  },
+  {
+    "code": "4646",
+    "name": "Fjaler",
+    "hasPropertyTax": true,
+    "lat": 61.2859,
+    "lon": 5.336
+  },
+  {
+    "code": "4005",
+    "name": "Notodden",
+    "hasPropertyTax": true,
+    "lat": 59.6639,
+    "lon": 9.0806
+  },
+  {
+    "code": "5029",
+    "name": "Skaun",
+    "hasPropertyTax": true,
+    "lat": 63.2661,
+    "lon": 10.046
+  },
+  {
+    "code": "3324",
+    "name": "Gol",
+    "hasPropertyTax": true,
+    "lat": 60.7286,
+    "lon": 9.018
+  },
+  {
+    "code": "1815",
+    "name": "Vega",
+    "hasPropertyTax": true,
+    "lat": 65.648,
+    "lon": 11.901
+  },
+  {
+    "code": "4223",
+    "name": "Vennesla",
+    "hasPropertyTax": true,
+    "lat": 58.3243,
+    "lon": 7.8595
+  },
+  {
+    "code": "1840",
+    "name": "Saltdal",
+    "hasPropertyTax": true,
+    "lat": 66.9564,
+    "lon": 15.3769
+  },
+  {
+    "code": "3120",
+    "name": "Rakkestad",
+    "hasPropertyTax": true,
+    "lat": 59.3683,
+    "lon": 11.3832
+  },
+  {
+    "code": "3220",
+    "name": "Enebakk",
+    "hasPropertyTax": false,
+    "lat": 59.7754,
+    "lon": 11.0732
+  },
+  {
+    "code": "4212",
+    "name": "Vegårshei",
+    "hasPropertyTax": true,
+    "lat": 58.7482,
+    "lon": 8.8294
+  },
+  {
+    "code": "4012",
+    "name": "Bamble",
+    "hasPropertyTax": true,
+    "lat": 59.0088,
+    "lon": 9.5503
+  },
+  {
+    "code": "3207",
+    "name": "Nordre Follo",
+    "hasPropertyTax": false,
+    "lat": 59.7296,
+    "lon": 10.8834
+  },
+  {
+    "code": "5528",
+    "name": "Dyrøy",
+    "hasPropertyTax": false,
+    "lat": 69.0177,
+    "lon": 17.7109
+  },
+  {
+    "code": "1825",
+    "name": "Grane",
+    "hasPropertyTax": true,
+    "lat": 65.4052,
+    "lon": 13.4579
+  },
+  {
+    "code": "3443",
+    "name": "Vestre Toten",
+    "hasPropertyTax": true,
+    "lat": 60.6234,
+    "lon": 10.6313
+  },
+  {
+    "code": "5035",
+    "name": "Stjørdal",
+    "hasPropertyTax": false,
+    "lat": 63.4871,
+    "lon": 11.1663
+  },
+  {
+    "code": "3222",
+    "name": "Lørenskog",
+    "hasPropertyTax": true,
+    "lat": 59.8856,
+    "lon": 10.9783
+  },
+  {
+    "code": "1866",
+    "name": "Hadsel",
+    "hasPropertyTax": true,
+    "lat": 68.4626,
+    "lon": 15.2614
+  },
+  {
+    "code": "4627",
+    "name": "Askøy",
+    "hasPropertyTax": true,
+    "lat": 60.4744,
+    "lon": 5.1155
+  },
+  {
+    "code": "5544",
+    "name": "Nordreisa - Ráisa - Raisi",
+    "hasPropertyTax": true,
+    "lat": 69.6777,
+    "lon": 21.3726
+  },
+  {
+    "code": "3124",
+    "name": "Aremark",
+    "hasPropertyTax": true,
+    "lat": 59.1947,
+    "lon": 11.6861
+  },
+  {
+    "code": "3405",
+    "name": "Lillehammer",
+    "hasPropertyTax": true,
+    "lat": 61.1302,
+    "lon": 10.3312
+  },
+  {
+    "code": "0301",
+    "name": "Oslo",
+    "hasPropertyTax": true,
+    "lat": 59.9748,
+    "lon": 10.7396
+  },
+  {
+    "code": "5022",
+    "name": "Rennebu",
+    "hasPropertyTax": true,
+    "lat": 62.7779,
+    "lon": 9.8589
+  },
+  {
+    "code": "4222",
+    "name": "Bykle",
+    "hasPropertyTax": true,
+    "lat": 59.4288,
+    "lon": 7.2026
+  },
+  {
+    "code": "5510",
+    "name": "Kvæfjord",
+    "hasPropertyTax": true,
+    "lat": 68.6511,
+    "lon": 15.9731
+  },
+  {
+    "code": "5032",
+    "name": "Selbu",
+    "hasPropertyTax": true,
+    "lat": 63.1859,
+    "lon": 11.063
+  },
+  {
+    "code": "3428",
+    "name": "Alvdal",
+    "hasPropertyTax": true,
+    "lat": 62.0672,
+    "lon": 10.5111
+  },
+  {
+    "code": "4024",
+    "name": "Hjartdal",
+    "hasPropertyTax": true,
+    "lat": 59.7142,
+    "lon": 8.7426
+  },
+  {
+    "code": "3310",
+    "name": "Hole",
+    "hasPropertyTax": false,
+    "lat": 60.0464,
+    "lon": 10.3203
+  },
+  {
+    "code": "3216",
+    "name": "Vestby",
+    "hasPropertyTax": true,
+    "lat": 59.5694,
+    "lon": 10.7391
+  },
+  {
+    "code": "1875",
+    "name": "Hábmer - Hamarøy",
+    "hasPropertyTax": true,
+    "lat": 68.0112,
+    "lon": 15.9646
+  },
+  {
+    "code": "5536",
+    "name": "Lyngen",
+    "hasPropertyTax": true,
+    "lat": 69.6978,
+    "lon": 20.1283
+  },
+  {
+    "code": "5047",
+    "name": "Overhalla",
+    "hasPropertyTax": true,
+    "lat": 64.4831,
+    "lon": 11.9161
+  },
+  {
+    "code": "3438",
+    "name": "Sør-Fron",
+    "hasPropertyTax": true,
+    "lat": 61.5594,
+    "lon": 9.7598
+  },
+  {
+    "code": "1133",
+    "name": "Hjelmeland",
+    "hasPropertyTax": true,
+    "lat": 59.2284,
+    "lon": 6.3702
+  },
+  {
+    "code": "1580",
+    "name": "Haram",
+    "hasPropertyTax": true,
+    "lat": 62.5772,
+    "lon": 6.5659
+  },
+  {
+    "code": "1573",
+    "name": "Smøla",
+    "hasPropertyTax": true,
+    "lat": 63.3796,
+    "lon": 7.9972
+  },
+  {
+    "code": "5043",
+    "name": "Raarvihke - Røyrvik",
+    "hasPropertyTax": true,
+    "lat": 64.8989,
+    "lon": 13.5999
+  },
+  {
+    "code": "1146",
+    "name": "Tysvær",
+    "hasPropertyTax": true,
+    "lat": 59.401,
+    "lon": 5.4805
+  },
+  {
+    "code": "4641",
+    "name": "Aurland",
+    "hasPropertyTax": true,
+    "lat": 60.8941,
+    "lon": 7.0899
+  },
+  {
+    "code": "4619",
+    "name": "Eidfjord",
+    "hasPropertyTax": true,
+    "lat": 60.3836,
+    "lon": 7.1591
+  },
+  {
+    "code": "3420",
+    "name": "Elverum",
+    "hasPropertyTax": true,
+    "lat": 60.9569,
+    "lon": 11.7858
+  },
+  {
+    "code": "3911",
+    "name": "Færder",
+    "hasPropertyTax": false,
+    "lat": 59.2154,
+    "lon": 10.4108
+  },
+  {
+    "code": "1874",
+    "name": "Moskenes",
+    "hasPropertyTax": true,
+    "lat": 67.9406,
+    "lon": 12.9883
+  },
+  {
+    "code": "1535",
+    "name": "Vestnes",
+    "hasPropertyTax": true,
+    "lat": 62.5798,
+    "lon": 7.0306
+  },
+  {
+    "code": "3418",
+    "name": "Åsnes",
+    "hasPropertyTax": true,
+    "lat": 60.642,
+    "lon": 12.0758
+  },
+  {
+    "code": "1833",
+    "name": "Rana",
+    "hasPropertyTax": true,
+    "lat": 66.4351,
+    "lon": 14.1261
+  },
+  {
+    "code": "1560",
+    "name": "Tingvoll",
+    "hasPropertyTax": true,
+    "lat": 62.9421,
+    "lon": 8.2015
+  },
+  {
+    "code": "4202",
+    "name": "Grimstad",
+    "hasPropertyTax": true,
+    "lat": 58.3643,
+    "lon": 8.5144
+  },
+  {
+    "code": "1517",
+    "name": "Hareid",
+    "hasPropertyTax": true,
+    "lat": 62.3494,
+    "lon": 5.9764
+  },
+  {
+    "code": "3454",
+    "name": "Vang",
+    "hasPropertyTax": true,
+    "lat": 61.226,
+    "lon": 8.4448
+  },
+  {
+    "code": "5054",
+    "name": "Indre Fosen",
+    "hasPropertyTax": true,
+    "lat": 63.6789,
+    "lon": 10.2246
+  },
+  {
+    "code": "1539",
+    "name": "Rauma",
+    "hasPropertyTax": true,
+    "lat": 62.4933,
+    "lon": 7.6716
+  },
+  {
+    "code": "1108",
+    "name": "Sandnes",
+    "hasPropertyTax": true,
+    "lat": 59.0259,
+    "lon": 6.4692
+  },
+  {
+    "code": "4224",
+    "name": "Åseral",
+    "hasPropertyTax": true,
+    "lat": 58.688,
+    "lon": 7.4017
+  },
+  {
+    "code": "4016",
+    "name": "Drangedal",
+    "hasPropertyTax": true,
+    "lat": 59.1292,
+    "lon": 8.9133
+  },
+  {
+    "code": "3417",
+    "name": "Grue",
+    "hasPropertyTax": true,
+    "lat": 60.4234,
+    "lon": 12.1789
+  },
+  {
+    "code": "4647",
+    "name": "Sunnfjord",
+    "hasPropertyTax": true,
+    "lat": 61.4751,
+    "lon": 5.9268
+  },
+  {
+    "code": "1506",
+    "name": "Molde",
+    "hasPropertyTax": true,
+    "lat": 62.6846,
+    "lon": 7.8342
+  },
+  {
+    "code": "3238",
+    "name": "Nannestad",
+    "hasPropertyTax": false,
+    "lat": 60.2144,
+    "lon": 10.9668
+  },
+  {
+    "code": "4034",
+    "name": "Tokke",
+    "hasPropertyTax": true,
+    "lat": 59.4735,
+    "lon": 7.9639
+  },
+  {
+    "code": "1837",
+    "name": "Meløy",
+    "hasPropertyTax": true,
+    "lat": 66.7849,
+    "lon": 13.806
+  },
+  {
+    "code": "3431",
+    "name": "Dovre",
+    "hasPropertyTax": true,
+    "lat": 62.0944,
+    "lon": 9.4467
+  },
+  {
+    "code": "1853",
+    "name": "Evenes - Evenášši",
+    "hasPropertyTax": true,
+    "lat": 68.4963,
+    "lon": 16.9238
+  },
+  {
+    "code": "5021",
+    "name": "Oppdal",
+    "hasPropertyTax": true,
+    "lat": 62.5592,
+    "lon": 9.5231
+  },
+  {
+    "code": "1818",
+    "name": "Herøy",
+    "hasPropertyTax": true,
+    "lat": 66.0281,
+    "lon": 12.2739
+  },
+  {
+    "code": "5027",
+    "name": "Midtre Gauldal",
+    "hasPropertyTax": true,
+    "lat": 62.9213,
+    "lon": 10.541
+  },
+  {
+    "code": "5046",
+    "name": "Høylandet",
+    "hasPropertyTax": true,
+    "lat": 64.7567,
+    "lon": 12.3725
+  },
+  {
+    "code": "1111",
+    "name": "Sokndal",
+    "hasPropertyTax": true,
+    "lat": 58.3871,
+    "lon": 6.3195
+  },
+  {
+    "code": "3332",
+    "name": "Sigdal",
+    "hasPropertyTax": true,
+    "lat": 60.122,
+    "lon": 9.4797
+  },
+  {
+    "code": "5020",
+    "name": "Osen",
+    "hasPropertyTax": true,
+    "lat": 64.3252,
+    "lon": 10.5777
+  },
+  {
+    "code": "4618",
+    "name": "Ullensvang",
+    "hasPropertyTax": true,
+    "lat": 60.1546,
+    "lon": 6.6918
+  },
+  {
+    "code": "5636",
+    "name": "Unjárga - Nesseby",
+    "hasPropertyTax": true,
+    "lat": 70.1344,
+    "lon": 28.8887
+  },
+  {
+    "code": "3203",
+    "name": "Asker",
+    "hasPropertyTax": false,
+    "lat": 59.7365,
+    "lon": 10.438
+  },
+  {
+    "code": "4624",
+    "name": "Bjørnafjorden",
+    "hasPropertyTax": false,
+    "lat": 60.1862,
+    "lon": 5.7471
+  },
+  {
+    "code": "5526",
+    "name": "Sørreisa",
+    "hasPropertyTax": false,
+    "lat": 69.1273,
+    "lon": 18.1573
+  },
+  {
+    "code": "4602",
+    "name": "Kinn",
+    "hasPropertyTax": true,
+    "lat": 61.6156,
+    "lon": 5.3134
+  },
+  {
+    "code": "4633",
+    "name": "Fedje",
+    "hasPropertyTax": true,
+    "lat": 60.7721,
+    "lon": 4.7148
+  },
+  {
+    "code": "3103",
+    "name": "Moss",
+    "hasPropertyTax": true,
+    "lat": 59.4151,
+    "lon": 10.7276
+  },
+  {
+    "code": "3426",
+    "name": "Tolga",
+    "hasPropertyTax": true,
+    "lat": 62.3653,
+    "lon": 11.0549
+  },
+  {
+    "code": "4644",
+    "name": "Luster",
+    "hasPropertyTax": true,
+    "lat": 61.4457,
+    "lon": 7.4626
+  },
+  {
+    "code": "4220",
+    "name": "Bygland",
+    "hasPropertyTax": true,
+    "lat": 58.8688,
+    "lon": 7.609
+  },
+  {
+    "code": "1822",
+    "name": "Leirfjord",
+    "hasPropertyTax": true,
+    "lat": 66.0925,
+    "lon": 13.0744
+  },
+  {
+    "code": "5025",
+    "name": "Rosse - Røros",
+    "hasPropertyTax": true,
+    "lat": 62.5716,
+    "lon": 11.5528
+  },
+  {
+    "code": "3214",
+    "name": "Frogn",
+    "hasPropertyTax": true,
+    "lat": 59.6942,
+    "lon": 10.6617
+  },
+  {
+    "code": "5518",
+    "name": "Loabák - Lavangen",
+    "hasPropertyTax": true,
+    "lat": 68.741,
+    "lon": 17.7613
+  },
+  {
+    "code": "4018",
+    "name": "Nome",
+    "hasPropertyTax": true,
+    "lat": 59.2714,
+    "lon": 9.1323
+  },
+  {
+    "code": "5503",
+    "name": "Harstad - Hárstták",
+    "hasPropertyTax": true,
+    "lat": 68.7515,
+    "lon": 16.4304
+  },
+  {
+    "code": "1856",
+    "name": "Røst",
+    "hasPropertyTax": true,
+    "lat": 67.5191,
+    "lon": 12.1002
+  },
+  {
+    "code": "5061",
+    "name": "Rindal",
+    "hasPropertyTax": true,
+    "lat": 63.0238,
+    "lon": 9.2654
+  },
+  {
+    "code": "3909",
+    "name": "Larvik",
+    "hasPropertyTax": false,
+    "lat": 59.1697,
+    "lon": 9.9709
+  },
+  {
+    "code": "1834",
+    "name": "Lurøy",
+    "hasPropertyTax": true,
+    "lat": 66.4163,
+    "lon": 13.1321
+  },
+  {
+    "code": "1124",
+    "name": "Sola",
+    "hasPropertyTax": false,
+    "lat": 58.8952,
+    "lon": 5.6189
+  },
+  {
+    "code": "4001",
+    "name": "Porsgrunn",
+    "hasPropertyTax": true,
+    "lat": 59.1136,
+    "lon": 9.7503
+  },
+  {
+    "code": "1122",
+    "name": "Gjesdal",
+    "hasPropertyTax": true,
+    "lat": 58.8073,
+    "lon": 6.1972
+  },
+  {
+    "code": "4218",
+    "name": "Iveland",
+    "hasPropertyTax": true,
+    "lat": 58.4366,
+    "lon": 7.9335
+  },
+  {
+    "code": "3114",
+    "name": "Våler",
+    "hasPropertyTax": true,
+    "lat": 59.4525,
+    "lon": 10.917
+  },
+  {
+    "code": "5516",
+    "name": "Gratangen",
+    "hasPropertyTax": true,
+    "lat": 68.6994,
+    "lon": 17.4815
+  },
+  {
+    "code": "4651",
+    "name": "Stryn",
+    "hasPropertyTax": true,
+    "lat": 61.8673,
+    "lon": 6.7417
+  },
+  {
+    "code": "3110",
+    "name": "Hvaler",
+    "hasPropertyTax": true,
+    "lat": 59.059,
+    "lon": 11.0287
+  },
+  {
+    "code": "4634",
+    "name": "Masfjorden",
+    "hasPropertyTax": true,
+    "lat": 60.8559,
+    "lon": 5.4448
+  },
+  {
+    "code": "3413",
+    "name": "Stange",
+    "hasPropertyTax": true,
+    "lat": 60.6602,
+    "lon": 11.3238
+  },
+  {
+    "code": "4650",
+    "name": "Gloppen",
+    "hasPropertyTax": true,
+    "lat": 61.7317,
+    "lon": 6.1559
+  },
+  {
+    "code": "3441",
+    "name": "Gausdal",
+    "hasPropertyTax": true,
+    "lat": 61.2457,
+    "lon": 9.9684
+  },
+  {
+    "code": "4601",
+    "name": "Bergen",
+    "hasPropertyTax": true,
+    "lat": 60.3497,
+    "lon": 5.3744
+  },
+  {
+    "code": "1857",
+    "name": "Værøy",
+    "hasPropertyTax": true,
+    "lat": 67.6587,
+    "lon": 12.6458
+  },
+  {
+    "code": "1514",
+    "name": "Sande",
+    "hasPropertyTax": false,
+    "lat": 62.2353,
+    "lon": 5.6292
+  },
+  {
+    "code": "3312",
+    "name": "Lier",
+    "hasPropertyTax": false,
+    "lat": 59.8624,
+    "lon": 10.2349
+  },
+  {
+    "code": "5603",
+    "name": "Hammerfest - Hámmerfeasta",
+    "hasPropertyTax": true,
+    "lat": 70.7006,
+    "lon": 23.077
+  },
+  {
+    "code": "5057",
+    "name": "Ørland",
+    "hasPropertyTax": true,
+    "lat": 63.7983,
+    "lon": 9.8219
+  },
+  {
+    "code": "5055",
+    "name": "Heim",
+    "hasPropertyTax": true,
+    "lat": 63.226,
+    "lon": 8.812
+  },
+  {
+    "code": "1820",
+    "name": "Alstahaug",
+    "hasPropertyTax": true,
+    "lat": 65.937,
+    "lon": 12.5506
+  },
+  {
+    "code": "5059",
+    "name": "Orkland",
+    "hasPropertyTax": true,
+    "lat": 63.3157,
+    "lon": 9.5898
+  },
+  {
+    "code": "4613",
+    "name": "Bømlo",
+    "hasPropertyTax": true,
+    "lat": 59.7844,
+    "lon": 5.2158
+  },
+  {
+    "code": "3422",
+    "name": "Åmot",
+    "hasPropertyTax": true,
+    "lat": 61.2191,
+    "lon": 11.3831
+  },
+  {
+    "code": "5006",
+    "name": "Steinkjer",
+    "hasPropertyTax": true,
+    "lat": 64.033,
+    "lon": 11.3654
+  },
+  {
+    "code": "1827",
+    "name": "Dønna",
+    "hasPropertyTax": true,
+    "lat": 66.1202,
+    "lon": 12.5002
+  },
+  {
+    "code": "5501",
+    "name": "Tromsø",
+    "hasPropertyTax": true,
+    "lat": 69.7083,
+    "lon": 18.5477
+  },
+  {
+    "code": "3407",
+    "name": "Gjøvik",
+    "hasPropertyTax": true,
+    "lat": 60.8909,
+    "lon": 10.4609
+  },
+  {
+    "code": "4642",
+    "name": "Lærdal",
+    "hasPropertyTax": true,
+    "lat": 61.0782,
+    "lon": 7.6465
+  },
+  {
+    "code": "1806",
+    "name": "Narvik",
+    "hasPropertyTax": true,
+    "lat": 68.3017,
+    "lon": 16.8975
+  },
+  {
+    "code": "4623",
+    "name": "Samnanger",
+    "hasPropertyTax": true,
+    "lat": 60.3828,
+    "lon": 5.7434
+  },
+  {
+    "code": "3905",
+    "name": "Tønsberg",
+    "hasPropertyTax": false,
+    "lat": 59.3615,
+    "lon": 10.2927
+  },
+  {
+    "code": "3437",
+    "name": "Sel",
+    "hasPropertyTax": true,
+    "lat": 61.7773,
+    "lon": 9.4843
+  },
+  {
+    "code": "3446",
+    "name": "Gran",
+    "hasPropertyTax": true,
+    "lat": 60.4304,
+    "lon": 10.5264
+  },
+  {
+    "code": "3435",
+    "name": "Vågå",
+    "hasPropertyTax": true,
+    "lat": 61.6706,
+    "lon": 8.9665
+  },
+  {
+    "code": "5601",
+    "name": "Alta",
+    "hasPropertyTax": true,
+    "lat": 70.07,
+    "lon": 23.014
+  },
+  {
+    "code": "4637",
+    "name": "Hyllestad",
+    "hasPropertyTax": true,
+    "lat": 61.1838,
+    "lon": 5.2493
+  },
+  {
+    "code": "1151",
+    "name": "Utsira",
+    "hasPropertyTax": true,
+    "lat": 59.3069,
+    "lon": 4.8775
+  },
+  {
+    "code": "3450",
+    "name": "Etnedal",
+    "hasPropertyTax": true,
+    "lat": 60.96,
+    "lon": 9.6338
+  },
+  {
+    "code": "5001",
+    "name": "Trondheim - Tråante",
+    "hasPropertyTax": true,
+    "lat": 63.3553,
+    "lon": 10.4311
+  },
+  {
+    "code": "1804",
+    "name": "Bodø",
+    "hasPropertyTax": true,
+    "lat": 67.4103,
+    "lon": 14.8537
+  },
+  {
+    "code": "3316",
+    "name": "Modum",
+    "hasPropertyTax": true,
+    "lat": 59.9813,
+    "lon": 9.9491
+  },
+  {
+    "code": "3427",
+    "name": "Tynset",
+    "hasPropertyTax": true,
+    "lat": 62.3746,
+    "lon": 10.6239
+  },
+  {
+    "code": "3318",
+    "name": "Krødsherad",
+    "hasPropertyTax": true,
+    "lat": 60.196,
+    "lon": 9.6835
+  },
+  {
+    "code": "4632",
+    "name": "Austrheim",
+    "hasPropertyTax": true,
+    "lat": 60.7785,
+    "lon": 4.9092
+  },
+  {
+    "code": "1505",
+    "name": "Kristiansund",
+    "hasPropertyTax": true,
+    "lat": 63.0702,
+    "lon": 7.792
+  },
+  {
+    "code": "1516",
+    "name": "Ulstein",
+    "hasPropertyTax": true,
+    "lat": 62.3274,
+    "lon": 5.894
+  },
+  {
+    "code": "1547",
+    "name": "Aukra",
+    "hasPropertyTax": true,
+    "lat": 62.8238,
+    "lon": 6.8711
+  },
+  {
+    "code": "3448",
+    "name": "Nordre Land",
+    "hasPropertyTax": true,
+    "lat": 60.9368,
+    "lon": 9.9794
+  },
+  {
+    "code": "3328",
+    "name": "Ål",
+    "hasPropertyTax": true,
+    "lat": 60.7128,
+    "lon": 8.3346
+  },
+  {
+    "code": "1838",
+    "name": "Gildeskål",
+    "hasPropertyTax": true,
+    "lat": 66.9547,
+    "lon": 14.07
+  },
+  {
+    "code": "4221",
+    "name": "Valle",
+    "hasPropertyTax": true,
+    "lat": 59.1739,
+    "lon": 7.404
+  },
+  {
+    "code": "1120",
+    "name": "Klepp",
+    "hasPropertyTax": false,
+    "lat": 58.76,
+    "lon": 5.6022
+  },
+  {
+    "code": "5028",
+    "name": "Melhus",
+    "hasPropertyTax": true,
+    "lat": 63.1835,
+    "lon": 10.208
+  },
+  {
+    "code": "3447",
+    "name": "Søndre Land",
+    "hasPropertyTax": false,
+    "lat": 60.7183,
+    "lon": 10.2361
+  },
+  {
+    "code": "1577",
+    "name": "Volda",
+    "hasPropertyTax": true,
+    "lat": 62.0747,
+    "lon": 6.2114
+  },
+  {
+    "code": "5056",
+    "name": "Hitra",
+    "hasPropertyTax": true,
+    "lat": 63.5483,
+    "lon": 8.7394
+  },
+  {
+    "code": "1145",
+    "name": "Bokn",
+    "hasPropertyTax": true,
+    "lat": 59.2121,
+    "lon": 5.4122
+  },
+  {
+    "code": "3212",
+    "name": "Nesodden",
+    "hasPropertyTax": true,
+    "lat": 59.7745,
+    "lon": 10.6373
+  },
+  {
+    "code": "5524",
+    "name": "Målselv",
+    "hasPropertyTax": true,
+    "lat": 69.0274,
+    "lon": 18.9681
+  },
+  {
+    "code": "3205",
+    "name": "Lillestrøm",
+    "hasPropertyTax": true,
+    "lat": 59.9439,
+    "lon": 11.1764
+  },
+  {
+    "code": "1824",
+    "name": "Vefsn",
+    "hasPropertyTax": true,
+    "lat": 65.8695,
+    "lon": 13.1538
+  },
+  {
+    "code": "5538",
+    "name": "Storfjord - Omasvuotna - Omasvuono",
+    "hasPropertyTax": true,
+    "lat": 69.2886,
+    "lon": 20.2688
+  },
+  {
+    "code": "1845",
+    "name": "Sørfold",
+    "hasPropertyTax": true,
+    "lat": 67.5355,
+    "lon": 15.5551
+  },
+  {
+    "code": "3449",
+    "name": "Sør-Aurdal",
+    "hasPropertyTax": true,
+    "lat": 60.6812,
+    "lon": 9.617
+  },
+  {
+    "code": "1826",
+    "name": "Aarborte - Hattfjelldal",
+    "hasPropertyTax": true,
+    "lat": 65.4735,
+    "lon": 13.9504
+  },
+  {
+    "code": "1103",
+    "name": "Stavanger",
+    "hasPropertyTax": true,
+    "lat": 58.9449,
+    "lon": 5.6927
+  },
+  {
+    "code": "5632",
+    "name": "Båtsfjord",
+    "hasPropertyTax": true,
+    "lat": 70.5488,
+    "lon": 30.0134
+  },
+  {
+    "code": "4621",
+    "name": "Voss",
+    "hasPropertyTax": true,
+    "lat": 60.6822,
+    "lon": 6.4943
+  },
+  {
+    "code": "4207",
+    "name": "Flekkefjord",
+    "hasPropertyTax": true,
+    "lat": 58.3642,
+    "lon": 6.6876
+  },
+  {
+    "code": "3234",
+    "name": "Lunner",
+    "hasPropertyTax": true,
+    "lat": 60.2433,
+    "lon": 10.62
+  },
+  {
+    "code": "3240",
+    "name": "Eidsvoll",
+    "hasPropertyTax": true,
+    "lat": 60.3787,
+    "lon": 11.2217
+  },
+  {
+    "code": "1870",
+    "name": "Sortland - Suortá",
+    "hasPropertyTax": true,
+    "lat": 68.7274,
+    "lon": 15.6698
+  },
+  {
+    "code": "1528",
+    "name": "Sykkylven",
+    "hasPropertyTax": true,
+    "lat": 62.3473,
+    "lon": 6.658
+  },
+  {
+    "code": "3334",
+    "name": "Flesberg",
+    "hasPropertyTax": true,
+    "lat": 59.8653,
+    "lon": 9.4874
+  },
+  {
+    "code": "4645",
+    "name": "Askvoll",
+    "hasPropertyTax": true,
+    "lat": 61.4045,
+    "lon": 5.2153
+  },
+  {
+    "code": "4638",
+    "name": "Høyanger",
+    "hasPropertyTax": true,
+    "lat": 61.1875,
+    "lon": 5.9249
+  },
+  {
+    "code": "4219",
+    "name": "Evje og Hornnes",
+    "hasPropertyTax": true,
+    "lat": 58.5809,
+    "lon": 7.7689
+  },
+  {
+    "code": "4213",
+    "name": "Tvedestrand",
+    "hasPropertyTax": true,
+    "lat": 58.6224,
+    "lon": 8.9191
+  },
+  {
+    "code": "5624",
+    "name": "Lebesby",
+    "hasPropertyTax": true,
+    "lat": 70.6764,
+    "lon": 26.9875
+  },
+  {
+    "code": "3336",
+    "name": "Rollag",
+    "hasPropertyTax": true,
+    "lat": 59.9926,
+    "lon": 9.1939
+  },
+  {
+    "code": "1531",
+    "name": "Sula",
+    "hasPropertyTax": true,
+    "lat": 62.4278,
+    "lon": 6.2143
+  },
+  {
+    "code": "3322",
+    "name": "Nesbyen",
+    "hasPropertyTax": true,
+    "lat": 60.582,
+    "lon": 9.0997
+  },
+  {
+    "code": "4649",
+    "name": "Stad",
+    "hasPropertyTax": true,
+    "lat": 61.9969,
+    "lon": 5.6413
+  },
+  {
+    "code": "1566",
+    "name": "Surnadal",
+    "hasPropertyTax": true,
+    "lat": 62.9479,
+    "lon": 8.7491
+  },
+  {
+    "code": "1860",
+    "name": "Vestvågøy",
+    "hasPropertyTax": true,
+    "lat": 68.2004,
+    "lon": 13.7392
+  },
+  {
+    "code": "1106",
+    "name": "Haugesund",
+    "hasPropertyTax": true,
+    "lat": 59.4565,
+    "lon": 5.3075
+  },
+  {
+    "code": "3320",
+    "name": "Flå",
+    "hasPropertyTax": true,
+    "lat": 60.4208,
+    "lon": 9.4869
+  },
+  {
+    "code": "5626",
+    "name": "Gamvik",
+    "hasPropertyTax": true,
+    "lat": 70.8439,
+    "lon": 27.965
+  },
+  {
+    "code": "3423",
+    "name": "Stor-Elvdal",
+    "hasPropertyTax": true,
+    "lat": 61.6327,
+    "lon": 10.7532
+  },
+  {
+    "code": "1576",
+    "name": "Aure",
+    "hasPropertyTax": true,
+    "lat": 63.2993,
+    "lon": 8.7228
+  },
+  {
+    "code": "3301",
+    "name": "Drammen",
+    "hasPropertyTax": false,
+    "lat": 59.7052,
+    "lon": 10.1791
+  },
+  {
+    "code": "1839",
+    "name": "Beiarn",
+    "hasPropertyTax": true,
+    "lat": 66.8927,
+    "lon": 14.5899
+  },
+  {
+    "code": "4614",
+    "name": "Stord",
+    "hasPropertyTax": true,
+    "lat": 59.8273,
+    "lon": 5.4369
+  },
+  {
+    "code": "5532",
+    "name": "Balsfjord",
+    "hasPropertyTax": true,
+    "lat": 69.2998,
+    "lon": 19.1642
+  },
+  {
+    "code": "5007",
+    "name": "Namsos - Nåavmesjenjaelmie",
+    "hasPropertyTax": true,
+    "lat": 64.6393,
+    "lon": 11.6753
+  },
+  {
+    "code": "3224",
+    "name": "Rælingen",
+    "hasPropertyTax": false,
+    "lat": 59.8771,
+    "lon": 11.0731
+  },
+  {
+    "code": "1130",
+    "name": "Strand",
+    "hasPropertyTax": true,
+    "lat": 59.0359,
+    "lon": 6.0678
+  },
+  {
+    "code": "5037",
+    "name": "Levanger",
+    "hasPropertyTax": true,
+    "lat": 63.6638,
+    "lon": 11.2336
+  },
+  {
+    "code": "5041",
+    "name": "Snåase - Snåsa",
+    "hasPropertyTax": true,
+    "lat": 64.2355,
+    "lon": 12.3874
+  },
+  {
+    "code": "1578",
+    "name": "Fjord",
+    "hasPropertyTax": true,
+    "lat": 62.2967,
+    "lon": 7.333
+  },
+  {
+    "code": "1557",
+    "name": "Gjemnes",
+    "hasPropertyTax": true,
+    "lat": 62.8881,
+    "lon": 7.7531
+  },
+  {
+    "code": "3101",
+    "name": "Halden",
+    "hasPropertyTax": true,
+    "lat": 59.082,
+    "lon": 11.4838
+  },
+  {
+    "code": "4640",
+    "name": "Sogndal",
+    "hasPropertyTax": true,
+    "lat": 61.2631,
+    "lon": 6.8073
+  },
+  {
+    "code": "1828",
+    "name": "Nesna",
+    "hasPropertyTax": true,
+    "lat": 66.2318,
+    "lon": 13.1689
+  },
+  {
+    "code": "3419",
+    "name": "Våler",
+    "hasPropertyTax": true,
+    "lat": 60.8031,
+    "lon": 11.969
+  },
+  {
+    "code": "4204",
+    "name": "Kristiansand",
+    "hasPropertyTax": true,
+    "lat": 58.1841,
+    "lon": 7.8494
+  },
+  {
+    "code": "4036",
+    "name": "Vinje",
+    "hasPropertyTax": true,
+    "lat": 59.7629,
+    "lon": 7.8341
+  },
+  {
+    "code": "3326",
+    "name": "Hemsedal",
+    "hasPropertyTax": true,
+    "lat": 60.916,
+    "lon": 8.4564
+  },
+  {
+    "code": "3242",
+    "name": "Hurdal",
+    "hasPropertyTax": true,
+    "lat": 60.426,
+    "lon": 10.9172
+  },
+  {
+    "code": "3303",
+    "name": "Kongsberg",
+    "hasPropertyTax": true,
+    "lat": 59.5863,
+    "lon": 9.6451
+  },
+  {
+    "code": "5038",
+    "name": "Verdal",
+    "hasPropertyTax": true,
+    "lat": 63.7833,
+    "lon": 11.7398
+  },
+  {
+    "code": "3452",
+    "name": "Vestre Slidre",
+    "hasPropertyTax": true,
+    "lat": 61.0458,
+    "lon": 8.8915
+  },
+  {
+    "code": "5622",
+    "name": "Porsanger - Porsáŋgu - Porsanki",
+    "hasPropertyTax": true,
+    "lat": 70.3053,
+    "lon": 25.2516
+  },
+  {
+    "code": "5610",
+    "name": "Kárášjohka - Karasjok",
+    "hasPropertyTax": false,
+    "lat": 69.4104,
+    "lon": 25.368
+  },
+  {
+    "code": "3907",
+    "name": "Sandefjord",
+    "hasPropertyTax": false,
+    "lat": 59.1924,
+    "lon": 10.2189
+  },
+  {
+    "code": "4636",
+    "name": "Solund",
+    "hasPropertyTax": true,
+    "lat": 61.1402,
+    "lon": 4.9108
+  },
+  {
+    "code": "1865",
+    "name": "Vågan",
+    "hasPropertyTax": true,
+    "lat": 68.2929,
+    "lon": 14.5352
+  },
+  {
+    "code": "5620",
+    "name": "Nordkapp",
+    "hasPropertyTax": true,
+    "lat": 71.0674,
+    "lon": 25.7231
+  },
+  {
+    "code": "4615",
+    "name": "Fitjar",
+    "hasPropertyTax": true,
+    "lat": 59.8924,
+    "lon": 5.3547
+  },
+  {
+    "code": "5616",
+    "name": "Hasvik",
+    "hasPropertyTax": false,
+    "lat": 70.6161,
+    "lon": 22.4551
+  },
+  {
+    "code": "1144",
+    "name": "Kvitsøy",
+    "hasPropertyTax": true,
+    "lat": 59.0639,
+    "lon": 5.4031
+  },
+  {
+    "code": "1848",
+    "name": "Steigen",
+    "hasPropertyTax": true,
+    "lat": 67.8198,
+    "lon": 15.2378
+  },
+  {
+    "code": "3429",
+    "name": "Folldal",
+    "hasPropertyTax": true,
+    "lat": 62.1686,
+    "lon": 10.0108
+  },
+  {
+    "code": "4635",
+    "name": "Gulen",
+    "hasPropertyTax": true,
+    "lat": 60.9702,
+    "lon": 5.2462
+  },
+  {
+    "code": "3107",
+    "name": "Fredrikstad",
+    "hasPropertyTax": true,
+    "lat": 59.2264,
+    "lon": 10.9398
+  },
+  {
+    "code": "1859",
+    "name": "Flakstad",
+    "hasPropertyTax": true,
+    "lat": 68.0748,
+    "lon": 13.3035
+  },
+  {
+    "code": "4217",
+    "name": "Åmli",
+    "hasPropertyTax": true,
+    "lat": 58.7867,
+    "lon": 8.3435
+  },
+  {
+    "code": "1149",
+    "name": "Karmøy",
+    "hasPropertyTax": true,
+    "lat": 59.2817,
+    "lon": 5.2342
+  },
+  {
+    "code": "3116",
+    "name": "Skiptvet",
+    "hasPropertyTax": true,
+    "lat": 59.4763,
+    "lon": 11.147
+  },
+  {
+    "code": "5634",
+    "name": "Vardø",
+    "hasPropertyTax": true,
+    "lat": 70.3237,
+    "lon": 30.7839
+  },
+  {
+    "code": "4228",
+    "name": "Sirdal",
+    "hasPropertyTax": true,
+    "lat": 58.8208,
+    "lon": 6.8346
+  },
+  {
+    "code": "5033",
+    "name": "Tydal",
+    "hasPropertyTax": true,
+    "lat": 62.9997,
+    "lon": 11.6357
+  },
+  {
+    "code": "4620",
+    "name": "Ulvik",
+    "hasPropertyTax": true,
+    "lat": 60.5952,
+    "lon": 7.0687
+  },
+  {
+    "code": "1832",
+    "name": "Hemnes",
+    "hasPropertyTax": true,
+    "lat": 66.0361,
+    "lon": 13.914
+  },
+  {
+    "code": "3122",
+    "name": "Marker",
+    "hasPropertyTax": true,
+    "lat": 59.4829,
+    "lon": 11.6377
+  },
+  {
+    "code": "4612",
+    "name": "Sveio",
+    "hasPropertyTax": false,
+    "lat": 59.5893,
+    "lon": 5.4062
+  },
+  {
+    "code": "4227",
+    "name": "Kvinesdal",
+    "hasPropertyTax": true,
+    "lat": 58.4907,
+    "lon": 6.9503
+  },
+  {
+    "code": "5630",
+    "name": "Berlevåg",
+    "hasPropertyTax": true,
+    "lat": 70.7166,
+    "lon": 29.0955
+  },
+  {
+    "code": "3430",
+    "name": "Os",
+    "hasPropertyTax": true,
+    "lat": 62.4333,
+    "lon": 11.338
+  },
+  {
+    "code": "1835",
+    "name": "Træna",
+    "hasPropertyTax": false,
+    "lat": 66.5047,
+    "lon": 12.0315
+  },
+  {
+    "code": "1127",
+    "name": "Randaberg",
+    "hasPropertyTax": true,
+    "lat": 58.9967,
+    "lon": 5.6139
+  },
+  {
+    "code": "4625",
+    "name": "Austevoll",
+    "hasPropertyTax": false,
+    "lat": 60.0558,
+    "lon": 5.2385
+  },
+  {
+    "code": "3201",
+    "name": "Bærum",
+    "hasPropertyTax": false,
+    "lat": 59.9357,
+    "lon": 10.4889
+  },
+  {
+    "code": "4030",
+    "name": "Nissedal",
+    "hasPropertyTax": true,
+    "lat": 59.045,
+    "lon": 8.551
+  },
+  {
+    "code": "3439",
+    "name": "Ringebu",
+    "hasPropertyTax": true,
+    "lat": 61.541,
+    "lon": 10.2227
+  },
+  {
+    "code": "1114",
+    "name": "Bjerkreim",
+    "hasPropertyTax": true,
+    "lat": 58.6664,
+    "lon": 6.1924
+  },
+  {
+    "code": "5058",
+    "name": "Åfjord",
+    "hasPropertyTax": true,
+    "lat": 64.0375,
+    "lon": 10.2428
+  },
+  {
+    "code": "1520",
+    "name": "Ørsta",
+    "hasPropertyTax": true,
+    "lat": 62.212,
+    "lon": 6.2349
+  },
+  {
+    "code": "4206",
+    "name": "Farsund",
+    "hasPropertyTax": true,
+    "lat": 58.1422,
+    "lon": 6.7677
+  },
+  {
+    "code": "3236",
+    "name": "Jevnaker",
+    "hasPropertyTax": true,
+    "lat": 60.291,
+    "lon": 10.3974
+  },
+  {
+    "code": "3228",
+    "name": "Nes",
+    "hasPropertyTax": true,
+    "lat": 60.1361,
+    "lon": 11.4905
+  },
+  {
+    "code": "5540",
+    "name": "Gáivuotna - Kåfjord - Kaivuono",
+    "hasPropertyTax": true,
+    "lat": 69.517,
+    "lon": 20.7081
+  },
+  {
+    "code": "3209",
+    "name": "Ullensaker",
+    "hasPropertyTax": true,
+    "lat": 60.1623,
+    "lon": 11.2015
+  },
+  {
+    "code": "4203",
+    "name": "Arendal",
+    "hasPropertyTax": true,
+    "lat": 58.5003,
+    "lon": 8.7345
+  },
+  {
+    "code": "3112",
+    "name": "Råde",
+    "hasPropertyTax": true,
+    "lat": 59.3344,
+    "lon": 10.848
+  },
+  {
+    "code": "1851",
+    "name": "Lødingen",
+    "hasPropertyTax": true,
+    "lat": 68.4439,
+    "lon": 15.6355
+  },
+  {
+    "code": "5034",
+    "name": "Meråker",
+    "hasPropertyTax": true,
+    "lat": 63.4162,
+    "lon": 11.796
+  },
+  {
+    "code": "1112",
+    "name": "Lund",
+    "hasPropertyTax": true,
+    "lat": 58.4877,
+    "lon": 6.4576
+  },
+  {
+    "code": "3425",
+    "name": "Engerdal",
+    "hasPropertyTax": true,
+    "lat": 61.9781,
+    "lon": 11.8695
+  },
+  {
+    "code": "4214",
+    "name": "Froland",
+    "hasPropertyTax": true,
+    "lat": 58.5918,
+    "lon": 8.4081
+  },
+  {
+    "code": "1119",
+    "name": "Hå",
+    "hasPropertyTax": false,
+    "lat": 58.5997,
+    "lon": 5.7573
+  },
+  {
+    "code": "3105",
+    "name": "Sarpsborg",
+    "hasPropertyTax": true,
+    "lat": 59.276,
+    "lon": 11.1402
+  },
+  {
+    "code": "1868",
+    "name": "Øksnes",
+    "hasPropertyTax": false,
+    "lat": 68.8619,
+    "lon": 15.0749
+  },
+  {
+    "code": "4026",
+    "name": "Tinn",
+    "hasPropertyTax": true,
+    "lat": 59.9591,
+    "lon": 8.5874
+  },
+  {
+    "code": "4626",
+    "name": "Øygarden",
+    "hasPropertyTax": true,
+    "lat": 60.2979,
+    "lon": 5.0378
+  },
+  {
+    "code": "5520",
+    "name": "Bardu",
+    "hasPropertyTax": true,
+    "lat": 68.7699,
+    "lon": 18.7003
+  },
+  {
+    "code": "4631",
+    "name": "Alver",
+    "hasPropertyTax": true,
+    "lat": 60.6993,
+    "lon": 5.3317
+  },
+  {
+    "code": "3118",
+    "name": "Indre Østfold",
+    "hasPropertyTax": true,
+    "lat": 59.5925,
+    "lon": 11.1545
+  },
+  {
+    "code": "5607",
+    "name": "Vadsø",
+    "hasPropertyTax": true,
+    "lat": 70.2407,
+    "lon": 29.6389
+  },
+  {
+    "code": "4629",
+    "name": "Modalen",
+    "hasPropertyTax": true,
+    "lat": 60.8532,
+    "lon": 5.8737
+  },
+  {
+    "code": "3436",
+    "name": "Nord-Fron",
+    "hasPropertyTax": true,
+    "lat": 61.5561,
+    "lon": 9.4233
+  },
+  {
+    "code": "5530",
+    "name": "Senja",
+    "hasPropertyTax": true,
+    "lat": 69.3202,
+    "lon": 17.3959
+  },
+  {
+    "code": "4225",
+    "name": "Lyngdal",
+    "hasPropertyTax": true,
+    "lat": 58.2367,
+    "lon": 7.1729
+  },
+  {
+    "code": "4028",
+    "name": "Kviteseid",
+    "hasPropertyTax": true,
+    "lat": 59.3898,
+    "lon": 8.4995
+  },
+  {
+    "code": "4201",
+    "name": "Risør",
+    "hasPropertyTax": true,
+    "lat": 58.7504,
+    "lon": 9.1345
+  },
+  {
+    "code": "5049",
+    "name": "Flatanger",
+    "hasPropertyTax": true,
+    "lat": 64.4462,
+    "lon": 10.8227
+  },
+  {
+    "code": "3451",
+    "name": "Nord-Aurdal",
+    "hasPropertyTax": true,
+    "lat": 60.9857,
+    "lon": 9.3523
+  },
+  {
+    "code": "5605",
+    "name": "Sør-Varanger",
+    "hasPropertyTax": true,
+    "lat": 69.6856,
+    "lon": 29.9042
+  },
+  {
+    "code": "3412",
+    "name": "Løten",
+    "hasPropertyTax": true,
+    "lat": 60.8245,
+    "lon": 11.4009
+  },
+  {
+    "code": "5044",
+    "name": "Namsskogan",
+    "hasPropertyTax": true,
+    "lat": 64.882,
+    "lon": 12.9511
+  },
+  {
+    "code": "3442",
+    "name": "Østre Toten",
+    "hasPropertyTax": true,
+    "lat": 60.6275,
+    "lon": 10.845
+  },
+  {
+    "code": "5618",
+    "name": "Måsøy",
+    "hasPropertyTax": true,
+    "lat": 70.8599,
+    "lon": 24.8506
+  },
+  {
+    "code": "1836",
+    "name": "Rødøy",
+    "hasPropertyTax": true,
+    "lat": 66.5674,
+    "lon": 13.3942
+  },
+  {
+    "code": "5628",
+    "name": "Deatnu - Tana",
+    "hasPropertyTax": true,
+    "lat": 70.2992,
+    "lon": 27.7864
+  },
+  {
+    "code": "3901",
+    "name": "Horten",
+    "hasPropertyTax": true,
+    "lat": 59.4029,
+    "lon": 10.4155
+  },
+  {
+    "code": "5014",
+    "name": "Frøya",
+    "hasPropertyTax": true,
+    "lat": 63.7112,
+    "lon": 8.5811
+  },
+  {
+    "code": "5522",
+    "name": "Salangen",
+    "hasPropertyTax": true,
+    "lat": 68.882,
+    "lon": 17.8106
+  },
+  {
+    "code": "4010",
+    "name": "Siljan",
+    "hasPropertyTax": true,
+    "lat": 59.3057,
+    "lon": 9.7336
+  },
+  {
+    "code": "1841",
+    "name": "Fauske - Fuossko",
+    "hasPropertyTax": true,
+    "lat": 67.2779,
+    "lon": 15.4758
+  },
+  {
+    "code": "3314",
+    "name": "Øvre Eiker",
+    "hasPropertyTax": false,
+    "lat": 59.7702,
+    "lon": 9.8569
+  },
+  {
+    "code": "1511",
+    "name": "Vanylven",
+    "hasPropertyTax": false,
+    "lat": 62.0915,
+    "lon": 5.6485
+  },
+  {
+    "code": "5546",
+    "name": "Kvænangen",
+    "hasPropertyTax": true,
+    "lat": 69.9282,
+    "lon": 21.8822
+  },
+  {
+    "code": "4622",
+    "name": "Kvam",
+    "hasPropertyTax": true,
+    "lat": 60.3535,
+    "lon": 6.125
+  },
+  {
+    "code": "3230",
+    "name": "Gjerdrum",
+    "hasPropertyTax": false,
+    "lat": 60.0832,
+    "lon": 11.0089
+  },
+  {
+    "code": "1867",
+    "name": "Bø",
+    "hasPropertyTax": true,
+    "lat": 68.7135,
+    "lon": 14.6013
+  },
+  {
+    "code": "5026",
+    "name": "Holtålen",
+    "hasPropertyTax": true,
+    "lat": 62.8265,
+    "lon": 11.2504
+  },
+  {
+    "code": "3415",
+    "name": "Sør-Odal",
+    "hasPropertyTax": true,
+    "lat": 60.2182,
+    "lon": 11.7563
+  },
+  {
+    "code": "3432",
+    "name": "Lesja",
+    "hasPropertyTax": true,
+    "lat": 62.1802,
+    "lon": 8.7837
+  },
+  {
+    "code": "3338",
+    "name": "Nore og Uvdal",
+    "hasPropertyTax": true,
+    "lat": 60.2901,
+    "lon": 8.4337
+  },
+  {
+    "code": "1563",
+    "name": "Sunndal",
+    "hasPropertyTax": true,
+    "lat": 62.6701,
+    "lon": 8.6077
+  },
+  {
+    "code": "1525",
+    "name": "Stranda",
+    "hasPropertyTax": true,
+    "lat": 62.1325,
+    "lon": 6.999
+  },
+  {
+    "code": "1554",
+    "name": "Averøy",
+    "hasPropertyTax": true,
+    "lat": 63.0338,
+    "lon": 7.546
+  },
+  {
+    "code": "4628",
+    "name": "Vaksdal",
+    "hasPropertyTax": true,
+    "lat": 60.759,
+    "lon": 5.9651
+  },
+  {
+    "code": "1579",
+    "name": "Hustadvika",
+    "hasPropertyTax": true,
+    "lat": 62.8714,
+    "lon": 7.2129
+  },
+  {
+    "code": "4022",
+    "name": "Seljord",
+    "hasPropertyTax": true,
+    "lat": 59.5494,
+    "lon": 8.5318
+  },
+  {
+    "code": "3411",
+    "name": "Ringsaker",
+    "hasPropertyTax": true,
+    "lat": 60.956,
+    "lon": 10.8253
+  },
+  {
+    "code": "5612",
+    "name": "Guovdageaidnu - Kautokeino",
+    "hasPropertyTax": true,
+    "lat": 69.1232,
+    "lon": 23.7705
+  },
+  {
+    "code": "5534",
+    "name": "Karlsøy",
+    "hasPropertyTax": true,
+    "lat": 69.9914,
+    "lon": 19.2407
+  },
+  {
+    "code": "3218",
+    "name": "Ås",
+    "hasPropertyTax": true,
+    "lat": 59.6715,
+    "lon": 10.7842
+  },
+  {
+    "code": "1508",
+    "name": "Ålesund",
+    "hasPropertyTax": true,
+    "lat": 62.4888,
+    "lon": 6.6668
+  },
+  {
+    "code": "3226",
+    "name": "Aurskog-Høland",
+    "hasPropertyTax": true,
+    "lat": 59.8202,
+    "lon": 11.6193
+  },
+  {
+    "code": "4617",
+    "name": "Kvinnherad",
+    "hasPropertyTax": true,
+    "lat": 59.968,
+    "lon": 6.0702
+  },
+  {
+    "code": "1811",
+    "name": "Bindal",
+    "hasPropertyTax": true,
+    "lat": 65.09,
+    "lon": 12.6633
+  },
+  {
+    "code": "1532",
+    "name": "Giske",
+    "hasPropertyTax": true,
+    "lat": 62.5589,
+    "lon": 6.0754
+  },
+  {
+    "code": "3903",
+    "name": "Holmestrand",
+    "hasPropertyTax": true,
+    "lat": 59.5472,
+    "lon": 10.1913
+  },
+  {
+    "code": "4648",
+    "name": "Bremanger",
+    "hasPropertyTax": true,
+    "lat": 61.7706,
+    "lon": 5.3476
+  },
+  {
+    "code": "3232",
+    "name": "Nittedal",
+    "hasPropertyTax": true,
+    "lat": 60.0784,
+    "lon": 10.8483
+  },
+  {
+    "code": "5542",
+    "name": "Skjervøy",
+    "hasPropertyTax": true,
+    "lat": 70.1257,
+    "lon": 20.5897
+  },
+  {
+    "code": "1101",
+    "name": "Eigersund",
+    "hasPropertyTax": true,
+    "lat": 58.5032,
+    "lon": 6.1682
+  },
+  {
+    "code": "4032",
+    "name": "Fyresdal",
+    "hasPropertyTax": true,
+    "lat": 59.1488,
+    "lon": 8.0471
+  },
+  {
+    "code": "4616",
+    "name": "Tysnes",
+    "hasPropertyTax": true,
+    "lat": 59.9892,
+    "lon": 5.5495
+  },
+  {
+    "code": "1816",
+    "name": "Vevelstad",
+    "hasPropertyTax": true,
+    "lat": 65.6426,
+    "lon": 12.6603
+  },
+  {
+    "code": "1160",
+    "name": "Vindafjord",
+    "hasPropertyTax": true,
+    "lat": 59.5353,
+    "lon": 5.7884
+  },
+  {
+    "code": "4611",
+    "name": "Etne",
+    "hasPropertyTax": true,
+    "lat": 59.7531,
+    "lon": 6.1249
+  },
+  {
+    "code": "5031",
+    "name": "Malvik",
+    "hasPropertyTax": true,
+    "lat": 63.3789,
+    "lon": 10.7388
+  },
+  {
+    "code": "1135",
+    "name": "Sauda",
+    "hasPropertyTax": true,
+    "lat": 59.6862,
+    "lon": 6.4236
+  },
+  {
+    "code": "3421",
+    "name": "Trysil",
+    "hasPropertyTax": true,
+    "lat": 61.3093,
+    "lon": 12.1581
+  },
+  {
+    "code": "5052",
+    "name": "Leka",
+    "hasPropertyTax": true,
+    "lat": 65.0879,
+    "lon": 11.6409
+  },
+  {
+    "code": "4215",
+    "name": "Lillesand",
+    "hasPropertyTax": true,
+    "lat": 58.2158,
+    "lon": 8.2761
+  },
+  {
+    "code": "3305",
+    "name": "Ringerike",
+    "hasPropertyTax": true,
+    "lat": 60.2676,
+    "lon": 10.0896
+  },
+  {
+    "code": "5512",
+    "name": "Dielddanuorri - Tjeldsund",
+    "hasPropertyTax": true,
+    "lat": 68.6092,
+    "lon": 16.9146
+  },
+  {
+    "code": "4643",
+    "name": "Årdal",
+    "hasPropertyTax": true,
+    "lat": 61.2677,
+    "lon": 7.7632
+  },
+  {
+    "code": "3330",
+    "name": "Hol",
+    "hasPropertyTax": true,
+    "lat": 60.5677,
+    "lon": 8.0608
+  },
+  {
+    "code": "1871",
+    "name": "Andøy",
+    "hasPropertyTax": true,
+    "lat": 69.1018,
+    "lon": 15.7746
+  }
+]
