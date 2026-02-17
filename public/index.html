@@ -7,7 +7,8 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/style.css?v=3">
+  <meta http-equiv="cache-control" content="no-cache">
 </head>
 <body>
   <div id="app">
@@ -18,6 +19,10 @@
         <span class="badge">Tax-Free Municipalities</span>
       </div>
       <div class="header-right">
+        <div class="currency-toggle" onclick="toggleCurrency()">
+          <span class="currency-option" id="cur-nok" data-active="true">NOK</span>
+          <span class="currency-option" id="cur-eur" data-active="false">EUR</span>
+        </div>
         <div class="stat-pill" id="stat-total">
           <span class="stat-label">Listings</span>
           <span class="stat-value" id="total-count">-</span>
@@ -63,6 +68,38 @@
         </div>
 
         <div class="filter-section">
+          <h3>Category</h3>
+          <select id="filter-category" onchange="onCategoryChange()">
+            <option value="all">All (Homes + Plots)</option>
+            <option value="home" selected>Homes</option>
+            <option value="tomt">Tomt (Plots)</option>
+          </select>
+        </div>
+
+        <div class="filter-section" id="developed-filter" style="display:none">
+          <h3>Plot Type</h3>
+          <select id="filter-developed" onchange="applyFilters()">
+            <option value="">All plots</option>
+            <option value="1">Developed (Boligtomt)</option>
+            <option value="0">Non-developed</option>
+          </select>
+        </div>
+
+        <div class="filter-section" id="obligation-filter" style="display:none">
+          <h3>Building Obligation</h3>
+          <select id="filter-obligation" onchange="applyFilters()">
+            <option value="all">All</option>
+            <option value="none">No obligation (free to keep)</option>
+            <option value="has_clause">Has builder clause</option>
+            <option value="has_deadline">Has building deadline</option>
+            <option value="unknown">Unknown / not stated</option>
+          </select>
+          <p style="font-size:11px;color:var(--text-muted);margin-top:4px;">
+            Detects byggeklausul from listing descriptions. Since 2026, all plots legally have a 5yr obligation but enforcement varies.
+          </p>
+        </div>
+
+        <div class="filter-section">
           <h3>Property Type</h3>
           <select id="filter-property-type" onchange="applyFilters()">
             <option value="">All types</option>
@@ -96,7 +133,7 @@
             <span>No yearly fees (only utilities)</span>
           </label>
           <p style="font-size:11px;color:var(--text-muted);margin-top:4px;">
-            Filters for enebolig/gårdsbruk with no fellesutgifter
+            Excludes properties with fellesutgifter (shared monthly costs)
           </p>
         </div>
 
@@ -116,6 +153,12 @@
           <div id="map"></div>
         </div>
 
+        <!-- Drag handle to resize map -->
+        <div class="drag-handle" id="drag-handle">
+          <div class="drag-bar"></div>
+          <span class="drag-hint">Drag to resize map</span>
+        </div>
+
         <!-- Listings Grid -->
         <div class="listings-header">
           <h2 id="listings-title">Properties in Tax-Free Municipalities</h2>
@@ -132,6 +175,6 @@
   </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="/app.js"></script>
+  <script src="/app.js?v=3"></script>
 </body>
 </html>

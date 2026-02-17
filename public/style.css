@@ -116,6 +116,29 @@ body {
   to { transform: rotate(360deg); }
 }
 
+/* Currency Toggle */
+.currency-toggle {
+  display: flex;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.currency-option {
+  padding: 4px 10px;
+  color: var(--text-muted);
+  transition: all 0.15s;
+}
+
+.currency-option[data-active="true"] {
+  background: var(--accent);
+  color: #fff;
+}
+
 .last-update {
   color: var(--text-muted);
   font-size: 12px;
@@ -332,6 +355,46 @@ body {
   text-decoration: underline;
 }
 
+/* Drag Handle */
+.drag-handle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 24px;
+  cursor: ns-resize;
+  background: var(--bg-sidebar);
+  border-bottom: 1px solid var(--border);
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+  flex-shrink: 0;
+}
+
+.drag-bar {
+  width: 40px;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  transition: background 0.15s;
+}
+
+.drag-handle:hover .drag-bar,
+.drag-handle:active .drag-bar {
+  background: var(--accent);
+}
+
+.drag-hint {
+  display: none;
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.drag-handle:hover .drag-hint {
+  display: block;
+}
+
 /* Listings Header */
 .listings-header {
   display: flex;
@@ -429,6 +492,47 @@ body {
 .listing-badge.municipality-badge {
   background: rgba(139, 143, 163, 0.1);
   color: var(--text-muted);
+}
+
+.listing-badge.tomt-badge {
+  background: var(--orange-bg);
+  color: var(--orange);
+}
+
+.listing-badge.developed-badge {
+  background: var(--green-bg);
+  color: var(--green);
+}
+
+.listing-badge.undeveloped-badge {
+  background: rgba(139, 143, 163, 0.1);
+  color: var(--text-muted);
+}
+
+.listing-badge.obligation-none {
+  background: rgba(34, 197, 94, 0.15);
+  color: #4ade80;
+}
+
+.listing-badge.obligation-clause {
+  background: var(--red-bg);
+  color: var(--red);
+}
+
+.listing-badge.obligation-deadline {
+  background: var(--orange-bg);
+  color: var(--orange);
+}
+
+.listing-obligation-hint {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-style: italic;
+  margin-bottom: 8px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .listing-title {

@@ -2,7 +2,7 @@ const express = require('express');
 const path = require('path');
 const cron = require('node-cron');
 const Database = require('better-sqlite3');
-const { fetchListingsForMunicipality, fetchAllListings } = require('./scraper');
+const { fetchListingsForMunicipality, fetchPlotsForMunicipality } = require('./scraper');
 
 const app = express();
 const PORT = process.env.PORT || 3456;
@@ -31,7 +31,9 @@ db.exec(`
     shared_debt INTEGER DEFAULT 0,
     first_seen TEXT DEFAULT (datetime('now')),
     last_seen TEXT DEFAULT (datetime('now')),
-    is_new INTEGER DEFAULT 1
+    is_new INTEGER DEFAULT 1,
+    category TEXT DEFAULT 'home',
+    is_developed INTEGER DEFAULT NULL
   );
 
   CREATE TABLE IF NOT EXISTS update_log (
@@ -47,8 +49,51 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_listings_first_seen ON listings(first_seen);
 `);
 
-// Serve static files
-app.use(express.static(path.join(__dirname, 'public')));
+// Migrations: add new columns if they don't exist
+try {
+  db.prepare("SELECT category FROM listings LIMIT 1").get();
+} catch (e) {
+  db.exec("ALTER TABLE listings ADD COLUMN category TEXT DEFAULT 'home'");
+  db.exec("ALTER TABLE listings ADD COLUMN is_developed INTEGER DEFAULT NULL");
+}
+try {
+  db.prepare("SELECT building_obligation FROM listings LIMIT 1").get();
+} catch (e) {
+  db.exec("ALTER TABLE listings ADD COLUMN building_obligation TEXT DEFAULT 'unknown'");
+  db.exec("ALTER TABLE listings ADD COLUMN building_obligation_text TEXT DEFAULT NULL");
+}
+
+db.exec("CREATE INDEX IF NOT EXISTS idx_listings_category ON listings(category)");
+db.exec("CREATE INDEX IF NOT EXISTS idx_listings_obligation ON listings(building_obligation)");
+
+// Refresh status tracking
+let isRefreshing = false;
+let refreshProgress = 0;
+let refreshTotal = 0;
+
+// Exchange rate cache
+let eurRate = { rate: null, fetchedAt: 0 };
+
+async function getEurRate() {
+  const now = Date.now();
+  // Cache for 1 hour
+  if (eurRate.rate && now - eurRate.fetchedAt < 3600000) return eurRate.rate;
+  try {
+    const resp = await fetch('https://api.frankfurter.app/latest?from=NOK&to=EUR');
+    const data = await resp.json();
+    eurRate = { rate: data.rates.EUR, fetchedAt: now };
+    return eurRate.rate;
+  } catch (e) {
+    return eurRate.rate || 0.085; // fallback
+  }
+}
+
+// Serve static files with no-cache headers to prevent stale JS/CSS
+app.use(express.static(path.join(__dirname, 'public'), {
+  setHeaders: function(res, filePath) {
+    res.set('Cache-Control', 'no-cache, must-revalidate');
+  }
+}));
 
 // API: Get all municipalities with tax status
 app.get('/api/municipalities', (req, res) => {
@@ -56,9 +101,15 @@ app.get('/api/municipalities', (req, res) => {
   res.json(municipalities);
 });
 
+// API: Get EUR exchange rate
+app.get('/api/exchange-rate', async (req, res) => {
+  const rate = await getEurRate();
+  res.json({ NOK_EUR: rate });
+});
+
 // API: Get listings with filters
 app.get('/api/listings', (req, res) => {
-  const { municipality, min_price, max_price, min_area, property_type, sort, new_only } = req.query;
+  const { municipality, min_price, max_price, min_area, property_type, sort, new_only, category, developed, building_obligation } = req.query;
 
   let sql = 'SELECT * FROM listings WHERE 1=1';
   const params = [];
@@ -88,6 +139,19 @@ app.get('/api/listings', (req, res) => {
   }
   if (req.query.no_fees === '1') {
     sql += ' AND shared_cost = 0';
+  }
+  if (category && category !== 'all') {
+    sql += ' AND category = ?';
+    params.push(category);
+  }
+  if (developed === '1') {
+    sql += ' AND is_developed = 1';
+  } else if (developed === '0') {
+    sql += ' AND is_developed = 0';
+  }
+  if (building_obligation && building_obligation !== 'all') {
+    sql += ' AND building_obligation = ?';
+    params.push(building_obligation);
   }
 
   switch (sort) {
@@ -130,6 +194,11 @@ app.post('/api/refresh', async (req, res) => {
   }
 });
 
+// API: Get refresh status
+app.get('/api/refresh-status', (req, res) => {
+  res.json({ refreshing: isRefreshing, progress: refreshProgress, total: refreshTotal });
+});
+
 // API: Get update history
 app.get('/api/updates', (req, res) => {
   const updates = db.prepare(
@@ -143,8 +212,8 @@ function upsertListings(municipalityCode, municipalityName, listings) {
   const upsert = db.prepare(`
     INSERT INTO listings (id, municipality_code, municipality_name, title, price, price_text,
       address, area_m2, bedrooms, property_type, image_url, finn_url, latitude, longitude,
-      shared_cost, shared_debt, last_seen)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
+      shared_cost, shared_debt, category, is_developed, building_obligation, building_obligation_text, last_seen)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
     ON CONFLICT(id) DO UPDATE SET
       price = excluded.price,
       price_text = excluded.price_text,
@@ -152,6 +221,10 @@ function upsertListings(municipalityCode, municipalityName, listings) {
       image_url = excluded.image_url,
       shared_cost = excluded.shared_cost,
       shared_debt = excluded.shared_debt,
+      category = excluded.category,
+      is_developed = excluded.is_developed,
+      building_obligation = excluded.building_obligation,
+      building_obligation_text = excluded.building_obligation_text,
       last_seen = datetime('now'),
       is_new = 0
   `);
@@ -178,7 +251,11 @@ function upsertListings(municipalityCode, municipalityName, listings) {
         listing.latitude || null,
         listing.longitude || null,
         listing.sharedCost || 0,
-        listing.sharedDebt || 0
+        listing.sharedDebt || 0,
+        listing.category || 'home',
+        listing.isDeveloped ?? null,
+        listing.buildingObligation || 'unknown',
+        listing.buildingObligationText || null
       );
     }
   });
@@ -199,25 +276,39 @@ async function runUpdate() {
   const municipalities = require('./data/municipalities.json');
   const noTax = municipalities.filter(m => !m.hasPropertyTax);
 
+  isRefreshing = true;
+  refreshProgress = 0;
+  refreshTotal = noTax.length;
+
   console.log(`[${new Date().toISOString()}] Starting update for ${noTax.length} municipalities...`);
 
   // Mark all current listings as not-new before refresh
   db.prepare('UPDATE listings SET is_new = 0').run();
 
   for (const muni of noTax) {
+    refreshProgress++;
     try {
-      console.log(`  Fetching listings for ${muni.name} (${muni.code})...`);
+      // Fetch homes
+      console.log(`  Fetching homes for ${muni.name} (${muni.code})...`);
       const listings = await fetchListingsForMunicipality(muni);
-
       const newCount = upsertListings(muni.code, muni.name, listings);
+
+      // Fetch plots (tomt)
+      console.log(`  Fetching plots for ${muni.name} (${muni.code})...`);
+      await new Promise(r => setTimeout(r, 1500));
+      const plots = await fetchPlotsForMunicipality(muni);
+      const newPlots = upsertListings(muni.code, muni.name, plots);
+
+      const totalFound = listings.length + plots.length;
+      const totalNew = newCount + newPlots;
 
       db.prepare(`
         INSERT INTO update_log (municipality_code, listings_found, new_listings)
         VALUES (?, ?, ?)
-      `).run(muni.code, listings.length, newCount);
+      `).run(muni.code, totalFound, totalNew);
 
-      if (newCount > 0) {
-        console.log(`    Found ${listings.length} listings (${newCount} new)`);
+      if (totalNew > 0) {
+        console.log(`    Found ${listings.length} homes + ${plots.length} plots (${totalNew} new)`);
       }
 
       // Rate limiting: 2s between requests
@@ -231,6 +322,7 @@ async function runUpdate() {
     }
   }
 
+  isRefreshing = false;
   console.log(`[${new Date().toISOString()}] Update complete.`);
 }
 
