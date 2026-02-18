@@ -664,6 +664,11 @@ body {
   color: var(--orange);
 }
 
+.listing-badge.tax-badge {
+  background: var(--red-bg);
+  color: var(--red);
+}
+
 .listing-obligation-hint {
   font-size: 11px;
   color: var(--text-muted);

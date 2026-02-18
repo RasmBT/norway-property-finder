@@ -38,7 +38,7 @@ function toggleCurrency() {
   try {
     var wasCurrency = currency;
     currency = currency === 'NOK' ? 'EUR' : 'NOK';
-    document.title = 'Norway Property Finder (' + currency + ')';
+    document.title = 'Norway Property Finder' + (currency === 'EUR' ? ' (EUR)' : '');
 
     var nokEl = document.getElementById('cur-nok');
     var eurEl = document.getElementById('cur-eur');
@@ -229,6 +229,8 @@ function hasActiveFilters() {
   if (document.getElementById('filter-developed').value !== '') return true;
   if (document.getElementById('filter-obligation').value !== 'all') return true;
   if (document.getElementById('filter-ownership').value !== '') return true;
+  var taxFreeEl = document.getElementById('filter-tax-free');
+  if (taxFreeEl && taxFreeEl.checked) return true;
   return false;
 }
 
@@ -445,8 +447,7 @@ function renderListings(items) {
   }
 
   grid.innerHTML = items.map(function(listing) {
-    var muni = municipalities.find(function(m) { return m.code === listing.municipality_code; });
-    var hasTax = muni ? muni.hasPropertyTax : false;
+    var hasTax = listing.has_property_tax === 1;
     var isTomt = listing.category === 'tomt';
     var obl = listing.building_obligation;
 
@@ -472,7 +473,11 @@ function renderListings(items) {
 
     if (listing.property_type) badges += '<span class="listing-badge type-badge">' + escapeHtml(listing.property_type) + '</span>';
     badges += '<span class="listing-badge municipality-badge">' + escapeHtml(listing.municipality_name) + '</span>';
-    if (!hasTax) badges += '<span class="listing-badge" style="background:rgba(34,197,94,0.1);color:#22c55e">No tax</span>';
+    if (!hasTax) {
+      badges += '<span class="listing-badge" style="background:rgba(34,197,94,0.1);color:#22c55e">No tax</span>';
+    } else {
+      badges += '<span class="listing-badge tax-badge">Has tax</span>';
+    }
 
     var imgHtml = listing.image_url
       ? '<img class="listing-image" src="' + escapeHtml(listing.image_url) + '" alt="" loading="lazy" onerror="this.style.display=\'none\'">'
@@ -584,6 +589,8 @@ function buildFilterParams() {
   if (developed) params.set('developed', developed);
   if (obligation && obligation !== 'all') params.set('building_obligation', obligation);
   if (ownership) params.set('plot_owned', ownership);
+  var taxFreeEl = document.getElementById('filter-tax-free');
+  if (taxFreeEl && taxFreeEl.checked) params.set('tax_free', '1');
 
   return params.toString();
 }
@@ -631,7 +638,7 @@ async function applyFilters() {
       return;
     }
   }
-  titleEl.textContent = title + ' in Tax-Free Municipalities';
+  titleEl.textContent = title + ' in Norway';
 }
 
 function clearFilters() {
@@ -653,7 +660,9 @@ function clearFilters() {
   document.getElementById('ownership-filter').style.display = 'none';
   var noFees = document.getElementById('filter-no-fees');
   if (noFees) noFees.checked = false;
-  document.getElementById('listings-title').textContent = 'Properties in Tax-Free Municipalities';
+  var taxFree = document.getElementById('filter-tax-free');
+  if (taxFree) taxFree.checked = false;
+  document.getElementById('listings-title').textContent = 'Properties in Norway';
   // Clear smart search too
   var ssInput = document.getElementById('smart-search-input');
   var ssStatus = document.getElementById('smart-search-status');
@@ -786,6 +795,8 @@ function applySmartFilters(params) {
   document.getElementById('filter-ownership').value = '';
   var noFees = document.getElementById('filter-no-fees');
   if (noFees) noFees.checked = false;
+  var taxFreeReset = document.getElementById('filter-tax-free');
+  if (taxFreeReset) taxFreeReset.checked = false;
 
   // Apply returned params
   if (params.municipality) {
@@ -828,6 +839,10 @@ function applySmartFilters(params) {
   if (params.plot_owned) {
     document.getElementById('filter-ownership').value = params.plot_owned;
   }
+  if (params.tax_free === '1') {
+    var tf = document.getElementById('filter-tax-free');
+    if (tf) tf.checked = true;
+  }
 
   // Show/hide plot-specific filters and trigger search
   onCategoryChange();
@@ -862,6 +877,7 @@ function buildStatusSummary(params) {
   if (params.plot_owned === 'selveier') parts.push('freehold');
   if (params.plot_owned === 'tomtefeste') parts.push('leasehold');
   if (params.no_fees === '1') parts.push('no fees');
+  if (params.tax_free === '1') parts.push('tax-free only');
   if (params.new_only === '1') parts.push('new only');
   if (params.sort === 'price_asc') parts.push('cheapest first');
   if (params.sort === 'price_desc') parts.push('most expensive first');
@@ -970,6 +986,8 @@ function updateFilterCount() {
   if (document.getElementById('filter-obligation').value !== 'all') count++;
   if (document.getElementById('filter-ownership').value !== '') count++;
   if (document.getElementById('filter-sort').value !== 'newest') count++;
+  var taxFreeEl2 = document.getElementById('filter-tax-free');
+  if (taxFreeEl2 && taxFreeEl2.checked) count++;
 
   var btn = document.getElementById('btn-clear');
   if (!btn) return;

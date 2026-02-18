@@ -85,9 +85,17 @@ for (const col of plotDetailCols) {
   }
 }
 
+// Migration: has_property_tax column
+try {
+  db.prepare("SELECT has_property_tax FROM listings LIMIT 1").get();
+} catch (e) {
+  db.exec("ALTER TABLE listings ADD COLUMN has_property_tax INTEGER DEFAULT 0");
+}
+
 db.exec("CREATE INDEX IF NOT EXISTS idx_listings_category ON listings(category)");
 db.exec("CREATE INDEX IF NOT EXISTS idx_listings_obligation ON listings(building_obligation)");
 db.exec("CREATE INDEX IF NOT EXISTS idx_listings_plot_owned ON listings(plot_owned)");
+db.exec("CREATE INDEX IF NOT EXISTS idx_listings_tax ON listings(has_property_tax)");
 
 // Refresh status tracking
 let isRefreshing = false;
@@ -180,6 +188,9 @@ app.get('/api/listings', (req, res) => {
     sql += ' AND plot_owned = ?';
     params.push(plot_owned);
   }
+  if (req.query.tax_free === '1') {
+    sql += ' AND has_property_tax = 0';
+  }
 
   switch (sort) {
     case 'price_asc': sql += ' ORDER BY price ASC NULLS LAST'; break;
@@ -212,6 +223,7 @@ app.get('/api/listing-counts', (req, res) => {
   else if (developed === '0') { sql += ' AND is_developed = 0'; }
   if (building_obligation && building_obligation !== 'all') { sql += ' AND building_obligation = ?'; params.push(building_obligation); }
   if (plot_owned) { sql += ' AND plot_owned = ?'; params.push(plot_owned); }
+  if (req.query.tax_free === '1') { sql += ' AND has_property_tax = 0'; }
 
   sql += ' GROUP BY municipality_code ORDER BY count DESC';
 
@@ -264,28 +276,35 @@ app.get('/api/updates', (req, res) => {
 const SMART_SEARCH_SYSTEM_PROMPT = `You are a filter-extraction assistant for a Norwegian property finder app.
 Given a natural language query, return a JSON object with the matching filter parameters.
 
-TAX-FREE MUNICIPALITIES (code → name):
-4226=Hægebostad, 3220=Enebakk, 3207=Nordre Follo, 5528=Dyrøy, 5035=Stjørdal,
-3911=Færder, 3238=Nannestad, 3909=Larvik, 1124=Sola, 3310=Hole,
-3203=Asker, 4624=Bjørnafjorden, 5526=Sørreisa, 1514=Sande, 3312=Lier,
-3301=Drammen, 3905=Tønsberg, 3447=Søndre Land, 5610=Kárášjohka/Karasjok,
-3907=Sandefjord, 1120=Klepp, 1119=Hå, 3201=Bærum, 1868=Øksnes,
-3314=Øvre Eiker, 1511=Vanylven, 4612=Sveio, 3224=Rælingen, 3230=Gjerdrum,
-4625=Austevoll, 1835=Træna, 5616=Hasvik
+The app covers ALL Norwegian municipalities. Some are tax-free (no property tax).
+
+POPULAR MUNICIPALITIES (code → name) — a subset; match any Norwegian municipality name:
+0301=Oslo, 4601=Bergen, 5001=Trondheim, 1103=Stavanger, 1108=Sandnes,
+3201=Bærum, 3203=Asker, 3301=Drammen, 3205=Lillestrøm, 3107=Fredrikstad,
+3105=Sarpsborg, 3403=Hamar, 3405=Lillehammer, 3407=Gjøvik, 3901=Horten,
+3903=Holmestrand, 3905=Tønsberg, 3907=Sandefjord, 3909=Larvik, 3911=Færder,
+4001=Porsgrunn, 4003=Skien, 4201=Risør, 4202=Grimstad, 4203=Arendal,
+4204=Kristiansand, 5501=Tromsø, 5503=Harstad, 5601=Alta, 1804=Bodø,
+1806=Narvik, 1506=Molde, 1505=Kristiansund, 1508=Ålesund, 1106=Haugesund,
+3303=Kongsberg, 3305=Ringerike, 3312=Lier, 3314=Øvre Eiker, 3310=Hole,
+3220=Enebakk, 3207=Nordre Follo, 1124=Sola, 1120=Klepp, 1119=Hå,
+3238=Nannestad, 3224=Rælingen, 3230=Gjerdrum, 4624=Bjørnafjorden,
+4625=Austevoll, 4612=Sveio, 5035=Stjørdal, 3447=Søndre Land
 
 FILTER FIELDS (only include keys that the user's query implies):
-- municipality: one of the municipality codes above (string)
+- municipality: Norwegian municipality code (string)
 - category: "home", "tomt", or "all"
 - min_price: integer in NOK
 - max_price: integer in NOK
 - min_area: integer in m²
-- property_type: "Enebolig", "Gårdsbruk/Småbruk", "Rekkehus", or "Tomannsbolig"
-- developed: "1" (developed/boligtomt) or "0" (undeveloped)
+- property_type: "Enebolig", "Leilighet", "Gårdsbruk/Småbruk", "Rekkehus", or "Tomannsbolig"
+- developed: "1" (utilities connected) or "0" (no utilities)
 - building_obligation: "none", "has_clause", "has_deadline", or "unknown"
 - plot_owned: "selveier" (freehold) or "tomtefeste" (leasehold)
 - sort: "newest", "price_asc", "price_desc", "area_desc", or "area_asc"
 - new_only: "1" (only new listings)
 - no_fees: "1" (no shared monthly costs)
+- tax_free: "1" (only municipalities without property tax)
 
 RULES:
 - All prices must be in NOK. 1 million = 1000000. "2M" = 2000000. "500k" = 500000.
@@ -293,13 +312,15 @@ RULES:
 - "large" or "big" → sort by area_desc.
 - "plot" or "tomt" or "land" → category: "tomt".
 - "house" or "home" or "cabin" → category: "home".
+- "apartment" or "leilighet" → property_type: "Leilighet".
 - "freehold" or "selveier" → plot_owned: "selveier".
 - "leasehold" or "tomtefeste" → plot_owned: "tomtefeste".
 - "no obligation" or "no byggeklausul" → building_obligation: "none".
+- "tax free" or "no tax" or "no property tax" or "skattefri" → tax_free: "1".
 - "near Oslo" → municipality could be Bærum (3201) or Asker (3203). Pick the one mentioned or omit if unclear.
 - "detached" or "enebolig" → property_type: "Enebolig".
 - "farm" or "småbruk" → property_type: "Gårdsbruk/Småbruk".
-- Match municipality names case-insensitively and with partial matching (e.g. "asker" → 3203, "bærum" → 3201, "drammen" → 3301).
+- Match municipality names case-insensitively and with partial matching (e.g. "asker" → 3203, "bærum" → 3201, "drammen" → 3301, "oslo" → 0301, "bergen" → 4601).
 - Only output valid JSON. No extra text, no markdown.
 
 EXAMPLES:
@@ -309,19 +330,22 @@ Output: {"municipality":"3203","category":"tomt","max_price":2000000,"building_o
 Input: "large detached house"
 Output: {"category":"home","property_type":"Enebolig","sort":"area_desc"}
 
-Input: "freehold plots in Bærum"
-Output: {"municipality":"3201","category":"tomt","plot_owned":"selveier"}
+Input: "apartments in Oslo under 3M"
+Output: {"municipality":"0301","category":"home","property_type":"Leilighet","max_price":3000000}
+
+Input: "tax free plots in Bærum"
+Output: {"municipality":"3201","category":"tomt","tax_free":"1"}
 
 Input: "new listings under 5M"
 Output: {"max_price":5000000,"new_only":"1"}
 
-Input: "affordable homes in Sola with no fees"
-Output: {"municipality":"1124","category":"home","no_fees":"1","sort":"price_asc"}`;
+Input: "affordable homes in Bergen with no fees"
+Output: {"municipality":"4601","category":"home","no_fees":"1","sort":"price_asc"}`;
 
 const ALLOWED_SMART_KEYS = new Set([
   'municipality', 'category', 'min_price', 'max_price', 'min_area',
   'property_type', 'developed', 'building_obligation', 'plot_owned',
-  'sort', 'new_only', 'no_fees'
+  'sort', 'new_only', 'no_fees', 'tax_free'
 ]);
 
 app.post('/api/smart-search', async (req, res) => {
@@ -378,14 +402,14 @@ app.post('/api/smart-search', async (req, res) => {
 });
 
 // Upsert listings into database
-function upsertListings(municipalityCode, municipalityName, listings) {
+function upsertListings(municipalityCode, municipalityName, listings, hasPropertyTax) {
   const upsert = db.prepare(`
     INSERT INTO listings (id, municipality_code, municipality_name, title, price, price_text,
       address, area_m2, bedrooms, property_type, image_url, finn_url, latitude, longitude,
       shared_cost, shared_debt, category, is_developed, building_obligation, building_obligation_text,
       plot_owned, total_price, tax_value, cadastre, facilities, regulations, yearly_costs_text, utilities,
-      last_seen)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
+      has_property_tax, last_seen)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
     ON CONFLICT(id) DO UPDATE SET
       price = excluded.price,
       price_text = excluded.price_text,
@@ -405,6 +429,7 @@ function upsertListings(municipalityCode, municipalityName, listings) {
       regulations = excluded.regulations,
       yearly_costs_text = excluded.yearly_costs_text,
       utilities = excluded.utilities,
+      has_property_tax = excluded.has_property_tax,
       last_seen = datetime('now'),
       is_new = 0
   `);
@@ -443,7 +468,8 @@ function upsertListings(municipalityCode, municipalityName, listings) {
         listing.facilities || null,
         listing.regulations || null,
         listing.yearlyCostsText || null,
-        listing.utilities || null
+        listing.utilities || null,
+        hasPropertyTax ? 1 : 0
       );
     }
   });
@@ -462,30 +488,30 @@ function upsertListings(municipalityCode, municipalityName, listings) {
 // Run full update
 async function runUpdate() {
   const municipalities = require('./data/municipalities.json');
-  const noTax = municipalities.filter(m => !m.hasPropertyTax);
 
   isRefreshing = true;
   refreshProgress = 0;
-  refreshTotal = noTax.length;
+  refreshTotal = municipalities.length;
 
-  console.log(`[${new Date().toISOString()}] Starting update for ${noTax.length} municipalities...`);
+  console.log(`[${new Date().toISOString()}] Starting update for ${municipalities.length} municipalities...`);
 
   // Mark all current listings as not-new before refresh
   db.prepare('UPDATE listings SET is_new = 0').run();
 
-  for (const muni of noTax) {
+  for (const muni of municipalities) {
     refreshProgress++;
     try {
+      const hasTax = muni.hasPropertyTax;
       // Fetch homes
-      console.log(`  Fetching homes for ${muni.name} (${muni.code})...`);
+      console.log(`  [${refreshProgress}/${refreshTotal}] Fetching homes for ${muni.name} (${muni.code})${hasTax ? ' [TAX]' : ''}...`);
       const listings = await fetchListingsForMunicipality(muni);
-      const newCount = upsertListings(muni.code, muni.name, listings);
+      const newCount = upsertListings(muni.code, muni.name, listings, hasTax);
 
       // Fetch plots (tomt)
-      console.log(`  Fetching plots for ${muni.name} (${muni.code})...`);
+      console.log(`  [${refreshProgress}/${refreshTotal}] Fetching plots for ${muni.name} (${muni.code})...`);
       await new Promise(r => setTimeout(r, 1500));
       const plots = await fetchPlotsForMunicipality(muni);
-      const newPlots = upsertListings(muni.code, muni.name, plots);
+      const newPlots = upsertListings(muni.code, muni.name, plots, hasTax);
 
       const totalFound = listings.length + plots.length;
       const totalNew = newCount + newPlots;
@@ -495,11 +521,11 @@ async function runUpdate() {
         VALUES (?, ?, ?)
       `).run(muni.code, totalFound, totalNew);
 
-      if (totalNew > 0) {
+      if (totalFound > 0) {
         console.log(`    Found ${listings.length} homes + ${plots.length} plots (${totalNew} new)`);
       }
 
-      // Rate limiting: 2s between requests
+      // Rate limiting: 2s between municipalities
       await new Promise(r => setTimeout(r, 2000));
     } catch (err) {
       console.error(`    Error for ${muni.name}:`, err.message);

@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Norway Property Finder - Tax-Free Municipalities</title>
+  <title>Norway Property Finder</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/style.css?v=13">
+  <link rel="stylesheet" href="/style.css?v=14">
   <meta http-equiv="cache-control" content="no-cache">
 </head>
 <body>
@@ -17,7 +17,7 @@
     <header class="header">
       <div class="header-left">
         <h1>Norway Property Finder</h1>
-        <span class="badge">Tax-Free Municipalities</span>
+        <span class="badge">All Municipalities</span>
       </div>
       <div class="header-right">
         <div class="currency-toggle" onclick="toggleCurrency()">
@@ -51,7 +51,7 @@
         <div class="smart-search-section">
           <div class="smart-search-row">
             <input type="text" id="smart-search-input" class="smart-search-input"
-              placeholder='e.g. "cheap plot in Asker, no obligation"'
+              placeholder='e.g. "cheap house in Oslo" or "tax-free plot in Asker"'
               onkeydown="if(event.key==='Enter'){event.preventDefault();runSmartSearch();}">
             <button class="smart-search-btn" onclick="runSmartSearch()" title="AI Search">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -67,7 +67,7 @@
         <div class="filter-section">
           <h3>Municipality</h3>
           <select id="filter-municipality" onchange="applyFilters()">
-            <option value="">All tax-free municipalities</option>
+            <option value="">All municipalities</option>
           </select>
         </div>
 
@@ -169,6 +169,16 @@
           </p>
         </div>
 
+        <div class="filter-section">
+          <label class="checkbox-label">
+            <input type="checkbox" id="filter-tax-free" onchange="applyFilters()">
+            <span>Tax-free municipalities only</span>
+          </label>
+          <p style="font-size:11px;color:var(--text-muted);margin-top:4px;">
+            Only show listings in the 32 municipalities with no property tax (eiendomsskatt)
+          </p>
+        </div>
+
         <button class="btn-clear" id="btn-clear" onclick="clearFilters()">Clear Filters</button>
 
         <!-- Municipality stats -->
@@ -193,7 +203,7 @@
 
         <!-- Listings Grid -->
         <div class="listings-header">
-          <h2 id="listings-title">Properties in Tax-Free Municipalities</h2>
+          <h2 id="listings-title">Properties in Norway</h2>
           <div class="listings-header-right">
             <select class="listings-sort" id="listings-sort" onchange="onListingsSortChange(this.value)">
               <option value="newest">Newest</option>
@@ -232,6 +242,6 @@
   </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="/app.js?v=13"></script>
+  <script src="/app.js?v=14"></script>
 </body>
 </html>
