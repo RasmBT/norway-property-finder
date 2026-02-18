@@ -870,6 +870,51 @@ body {
 .legend-dot.has-tax { background: #ef4444; }
 .legend-dot.selected { box-shadow: 0 0 0 3px var(--accent); }
 
+/* Draw Area Controls */
+.draw-controls {
+  display: flex;
+  gap: 6px;
+}
+
+.btn-draw, .btn-clear-area {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 10px;
+  color: var(--text);
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.btn-draw:hover, .btn-clear-area:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.btn-draw.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.btn-clear-area {
+  background: var(--red-bg);
+  border-color: var(--red);
+  color: var(--red);
+  font-size: 11px;
+}
+
+.btn-clear-area:hover {
+  background: var(--red);
+  color: #fff;
+}
+
 /* Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;

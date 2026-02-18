@@ -198,6 +198,12 @@ app.get('/api/listings', (req, res) => {
   if (req.query.tax_free === '1') {
     sql += ' AND has_property_tax = 0';
   }
+  // Bounding box filter (map area selection)
+  const { north, south, east, west } = req.query;
+  if (north && south && east && west) {
+    sql += ' AND latitude BETWEEN ? AND ? AND longitude BETWEEN ? AND ?';
+    params.push(Number(south), Number(north), Number(west), Number(east));
+  }
 
   switch (sort) {
     case 'price_asc': sql += ' ORDER BY price ASC NULLS LAST'; break;
@@ -231,6 +237,11 @@ app.get('/api/listing-counts', (req, res) => {
   if (building_obligation && building_obligation !== 'all') { sql += ' AND building_obligation = ?'; params.push(building_obligation); }
   if (plot_owned) { sql += ' AND plot_owned = ?'; params.push(plot_owned); }
   if (req.query.tax_free === '1') { sql += ' AND has_property_tax = 0'; }
+  const { north, south, east, west } = req.query;
+  if (north && south && east && west) {
+    sql += ' AND latitude BETWEEN ? AND ? AND longitude BETWEEN ? AND ?';
+    params.push(Number(south), Number(north), Number(west), Number(east));
+  }
 
   sql += ' GROUP BY municipality_code ORDER BY count DESC';
 

@@ -12,6 +12,12 @@ var miniMap = null;
 var miniHoverMarker = null;
 var miniMapDismissed = false;
 var smartSearchMunicipalities = ''; // comma-separated codes from AI search
+// Draw area selection
+var selectedBounds = null; // L.LatLngBounds
+var isDrawMode = false;
+var isDrawing = false;
+var drawRect = null;
+var drawStart = null;
 
 // Initialize
 document.addEventListener('DOMContentLoaded', async function() {
@@ -112,8 +118,16 @@ function initMap() {
     '<div class="map-legend">' +
     '<div class="legend-item"><div class="legend-dot no-tax"></div><span>No property tax</span></div>' +
     '<div class="legend-item"><div class="legend-dot has-tax"></div><span>Has property tax</span></div>' +
+    '</div>' +
+    '<div class="draw-controls">' +
+    '<button class="btn-draw" id="btn-draw" onclick="toggleDrawMode()" title="Draw area to filter listings">' +
+    '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"></rect></svg>' +
+    ' Select Area</button>' +
+    '<button class="btn-clear-area" id="btn-clear-area" onclick="clearDrawArea()" style="display:none">Clear Area</button>' +
     '</div>';
   document.querySelector('.map-container').appendChild(controlsDiv);
+
+  initDrawArea();
 }
 
 // --- MINI MAP ---
@@ -160,6 +174,104 @@ function closeMiniMap() {
   var wrapper = document.getElementById('mini-map-wrapper');
   wrapper.classList.remove('visible');
   wrapper.classList.add('dismissed');
+}
+
+// --- DRAW AREA SELECTION ---
+function initDrawArea() {
+  var mapEl = map.getContainer();
+
+  mapEl.addEventListener('mousedown', function(e) {
+    if (!isDrawMode) return;
+    // Only respond to left click on the map itself
+    if (e.button !== 0) return;
+    e.preventDefault();
+    e.stopPropagation();
+    isDrawing = true;
+    drawStart = map.mouseEventToLatLng(e);
+
+    // Remove old rectangle
+    if (drawRect) { map.removeLayer(drawRect); drawRect = null; }
+  });
+
+  mapEl.addEventListener('mousemove', function(e) {
+    if (!isDrawing || !drawStart) return;
+    e.preventDefault();
+    var current = map.mouseEventToLatLng(e);
+    var bounds = L.latLngBounds(drawStart, current);
+
+    if (drawRect) {
+      drawRect.setBounds(bounds);
+    } else {
+      drawRect = L.rectangle(bounds, {
+        color: '#3b82f6',
+        weight: 2,
+        fillOpacity: 0.15,
+        dashArray: '6 4',
+      }).addTo(map);
+    }
+  });
+
+  mapEl.addEventListener('mouseup', function(e) {
+    if (!isDrawing) return;
+    isDrawing = false;
+    var current = map.mouseEventToLatLng(e);
+
+    // Ignore tiny drags (accidental clicks)
+    if (drawStart && (Math.abs(drawStart.lat - current.lat) < 0.01 && Math.abs(drawStart.lng - current.lng) < 0.01)) {
+      if (drawRect) { map.removeLayer(drawRect); drawRect = null; }
+      drawStart = null;
+      return;
+    }
+
+    if (drawRect) {
+      selectedBounds = drawRect.getBounds();
+      document.getElementById('btn-clear-area').style.display = '';
+      // Exit draw mode after drawing
+      exitDrawMode();
+      applyFilters();
+    }
+    drawStart = null;
+  });
+}
+
+function toggleDrawMode() {
+  if (isDrawMode) {
+    exitDrawMode();
+  } else {
+    enterDrawMode();
+  }
+}
+
+function enterDrawMode() {
+  isDrawMode = true;
+  map.dragging.disable();
+  map.doubleClickZoom.disable();
+  var mapEl = map.getContainer();
+  mapEl.style.cursor = 'crosshair';
+  var btn = document.getElementById('btn-draw');
+  btn.classList.add('active');
+  btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"></rect></svg> Drawing...';
+}
+
+function exitDrawMode() {
+  isDrawMode = false;
+  isDrawing = false;
+  map.dragging.enable();
+  map.doubleClickZoom.enable();
+  var mapEl = map.getContainer();
+  mapEl.style.cursor = '';
+  var btn = document.getElementById('btn-draw');
+  btn.classList.remove('active');
+  btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"></rect></svg> Select Area';
+}
+
+function clearDrawArea() {
+  if (drawRect) { map.removeLayer(drawRect); drawRect = null; }
+  selectedBounds = null;
+  drawStart = null;
+  document.getElementById('btn-clear-area').style.display = 'none';
+  exitDrawMode();
+  applyFilters();
 }
 
 // --- DRAG HANDLE ---
@@ -599,6 +711,14 @@ function buildFilterParams() {
   var taxFreeEl = document.getElementById('filter-tax-free');
   if (taxFreeEl && taxFreeEl.checked) params.set('tax_free', '1');
 
+  // Bounding box from draw area
+  if (selectedBounds) {
+    params.set('north', selectedBounds.getNorth());
+    params.set('south', selectedBounds.getSouth());
+    params.set('east', selectedBounds.getEast());
+    params.set('west', selectedBounds.getWest());
+  }
+
   return params.toString();
 }
 
@@ -638,6 +758,10 @@ async function applyFilters() {
   if (category === 'tomt') title = 'Plots (Tomt)';
   else if (category === 'all') title = 'All Properties & Plots';
 
+  if (selectedBounds) {
+    titleEl.textContent = title + ' in Selected Area';
+    return;
+  }
   if (smartSearchMunicipalities) {
     var count = smartSearchMunicipalities.split(',').length;
     titleEl.textContent = title + ' in ' + count + ' municipalities';
@@ -675,6 +799,11 @@ function clearFilters() {
   var taxFree = document.getElementById('filter-tax-free');
   if (taxFree) taxFree.checked = false;
   document.getElementById('listings-title').textContent = 'Properties in Norway';
+  // Clear draw area
+  if (drawRect) { map.removeLayer(drawRect); drawRect = null; }
+  selectedBounds = null;
+  document.getElementById('btn-clear-area').style.display = 'none';
+  exitDrawMode();
   // Clear smart search too
   smartSearchMunicipalities = '';
   var ssInput = document.getElementById('smart-search-input');
