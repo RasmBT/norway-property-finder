@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const cron = require('node-cron');
@@ -146,8 +147,14 @@ app.get('/api/listings', (req, res) => {
   const params = [];
 
   if (municipality) {
-    sql += ' AND municipality_code = ?';
-    params.push(municipality);
+    const codes = municipality.split(',').map(c => c.trim()).filter(Boolean);
+    if (codes.length === 1) {
+      sql += ' AND municipality_code = ?';
+      params.push(codes[0]);
+    } else if (codes.length > 1) {
+      sql += ` AND municipality_code IN (${codes.map(() => '?').join(',')})`;
+      params.push(...codes);
+    }
   }
   if (min_price && !isNaN(Number(min_price))) {
     sql += ' AND price >= ?';
@@ -278,7 +285,7 @@ Given a natural language query, return a JSON object with the matching filter pa
 
 The app covers ALL Norwegian municipalities. Some are tax-free (no property tax).
 
-POPULAR MUNICIPALITIES (code → name) — a subset; match any Norwegian municipality name:
+MUNICIPALITIES (code → name):
 0301=Oslo, 4601=Bergen, 5001=Trondheim, 1103=Stavanger, 1108=Sandnes,
 3201=Bærum, 3203=Asker, 3301=Drammen, 3205=Lillestrøm, 3107=Fredrikstad,
 3105=Sarpsborg, 3403=Hamar, 3405=Lillehammer, 3407=Gjøvik, 3901=Horten,
@@ -291,8 +298,28 @@ POPULAR MUNICIPALITIES (code → name) — a subset; match any Norwegian municip
 3238=Nannestad, 3224=Rælingen, 3230=Gjerdrum, 4624=Bjørnafjorden,
 4625=Austevoll, 4612=Sveio, 5035=Stjørdal, 3447=Søndre Land
 
+DRIVING DISTANCES FROM OSLO (0301):
+<1h: 3201 Bærum, 3203 Asker, 3312 Lier, 3205 Lillestrøm, 3224 Rælingen, 3207 Nordre Follo, 3220 Enebakk, 3230 Gjerdrum, 3238 Nannestad, 3310 Hole, 3301 Drammen, 3314 Øvre Eiker, 3305 Ringerike
+1-2h: 3107 Fredrikstad, 3105 Sarpsborg, 3901 Horten, 3903 Holmestrand, 3911 Færder, 3905 Tønsberg, 3303 Kongsberg, 3907 Sandefjord, 3403 Hamar, 3909 Larvik
+2-3h: 4001 Porsgrunn, 4003 Skien, 3405 Lillehammer, 3407 Gjøvik, 3447 Søndre Land, 4203 Arendal, 4202 Grimstad, 4201 Risør
+3-4h: 4204 Kristiansand
+
+DRIVING DISTANCES FROM BERGEN (4601):
+<1h: 4624 Bjørnafjorden
+1-2h: 4625 Austevoll, 4612 Sveio, 1106 Haugesund
+
+DRIVING DISTANCES FROM TRONDHEIM (5001):
+<1h: 5035 Stjørdal
+
+DRIVING DISTANCES FROM STAVANGER (1103):
+<1h: 1108 Sandnes, 1124 Sola, 1120 Klepp, 1119 Hå
+
+NOTE: Bergen, Trondheim, Stavanger, Bodø, Tromsø are 7+ hours from Oslo by car.
+Northern Norway (Bodø, Narvik, Tromsø, Harstad, Alta) are standalone regional centers, very far apart.
+Molde, Kristiansund, Ålesund are mid-Norway coast, 4-6h from both Oslo and Trondheim.
+
 FILTER FIELDS (only include keys that the user's query implies):
-- municipality: Norwegian municipality code (string)
+- municipality: comma-separated municipality codes for distance queries (e.g. "3301,3303,3305"), or single code for specific municipality
 - category: "home", "tomt", or "all"
 - min_price: integer in NOK
 - max_price: integer in NOK
@@ -317,10 +344,16 @@ RULES:
 - "leasehold" or "tomtefeste" → plot_owned: "tomtefeste".
 - "no obligation" or "no byggeklausul" → building_obligation: "none".
 - "tax free" or "no tax" or "no property tax" or "skattefri" → tax_free: "1".
-- "near Oslo" → municipality could be Bærum (3201) or Asker (3203). Pick the one mentioned or omit if unclear.
 - "detached" or "enebolig" → property_type: "Enebolig".
 - "farm" or "småbruk" → property_type: "Gårdsbruk/Småbruk".
-- Match municipality names case-insensitively and with partial matching (e.g. "asker" → 3203, "bærum" → 3201, "drammen" → 3301, "oslo" → 0301, "bergen" → 4601).
+- Match municipality names case-insensitively and with partial matching.
+- DISTANCE QUERIES: When the user says "Xh from [city]" or "near [city]" or "X-Yh from [city]", use the driving distance data above. Include ALL municipalities that fall within the requested range. Use comma-separated codes in the municipality field.
+  - "near Oslo" or "close to Oslo" → all municipalities <1h from Oslo
+  - "1-2h from Oslo" → all municipalities in the 1-2h zone
+  - "1-3h from Oslo" → combine <1h + 1-2h + 2-3h zones
+  - "within 2h of Oslo" → combine <1h + 1-2h zones
+  - Do the same logic for Bergen, Trondheim, Stavanger.
+  - NEVER include cities 7+ hours away (e.g. Trondheim is NOT near Oslo).
 - Only output valid JSON. No extra text, no markdown.
 
 EXAMPLES:
@@ -333,14 +366,20 @@ Output: {"category":"home","property_type":"Enebolig","sort":"area_desc"}
 Input: "apartments in Oslo under 3M"
 Output: {"municipality":"0301","category":"home","property_type":"Leilighet","max_price":3000000}
 
+Input: "cheap tomt 1-3h from Oslo"
+Output: {"municipality":"3107,3105,3901,3903,3911,3905,3303,3907,3403,3909,4001,4003,3405,3407,3447,4203,4202,4201","category":"tomt","sort":"price_asc"}
+
+Input: "plots near Bergen"
+Output: {"municipality":"4624","category":"tomt"}
+
 Input: "tax free plots in Bærum"
 Output: {"municipality":"3201","category":"tomt","tax_free":"1"}
 
 Input: "new listings under 5M"
 Output: {"max_price":5000000,"new_only":"1"}
 
-Input: "affordable homes in Bergen with no fees"
-Output: {"municipality":"4601","category":"home","no_fees":"1","sort":"price_asc"}`;
+Input: "affordable homes within 2h of Oslo"
+Output: {"municipality":"3201,3203,3312,3205,3224,3207,3220,3230,3238,3310,3301,3314,3305,3107,3105,3901,3903,3911,3905,3303,3907,3403,3909","category":"home","sort":"price_asc"}`;
 
 const ALLOWED_SMART_KEYS = new Set([
   'municipality', 'category', 'min_price', 'max_price', 'min_area',
@@ -359,7 +398,7 @@ app.post('/api/smart-search', async (req, res) => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer REDACTED_KEY',
+        'Authorization': `Bearer ${process.env.DEEPSEEK_API_KEY}`,
       },
       body: JSON.stringify({
         model: 'deepseek-chat',

@@ -11,6 +11,7 @@ var hoverMarker = null;
 var miniMap = null;
 var miniHoverMarker = null;
 var miniMapDismissed = false;
+var smartSearchMunicipalities = ''; // comma-separated codes from AI search
 
 // Initialize
 document.addEventListener('DOMContentLoaded', async function() {
@@ -310,6 +311,7 @@ function toggleTaxMunicipalities() {
 
 function filterByMunicipality(code) {
   // Only change municipality — keep all other filters (category, price, etc.) intact
+  smartSearchMunicipalities = ''; // clear multi-municipality from AI search
   document.getElementById('filter-municipality').value = code;
   applyFilters();
   document.querySelector('.listings-header').scrollIntoView({ behavior: 'smooth' });
@@ -569,7 +571,12 @@ function buildFilterParams() {
   var obligation = document.getElementById('filter-obligation').value;
   var ownership = document.getElementById('filter-ownership').value;
 
-  if (municipality) params.set('municipality', municipality);
+  // Smart search multi-municipality takes priority over dropdown
+  if (smartSearchMunicipalities) {
+    params.set('municipality', smartSearchMunicipalities);
+  } else if (municipality) {
+    params.set('municipality', municipality);
+  }
   if (minPrice) {
     var p = Number(minPrice);
     if (currency === 'EUR' && eurRate) p = Math.round(p / eurRate);
@@ -631,6 +638,11 @@ async function applyFilters() {
   if (category === 'tomt') title = 'Plots (Tomt)';
   else if (category === 'all') title = 'All Properties & Plots';
 
+  if (smartSearchMunicipalities) {
+    var count = smartSearchMunicipalities.split(',').length;
+    titleEl.textContent = title + ' in ' + count + ' municipalities';
+    return;
+  }
   if (muniCode) {
     var muni = municipalities.find(function(m) { return m.code === muniCode; });
     if (muni) {
@@ -664,6 +676,7 @@ function clearFilters() {
   if (taxFree) taxFree.checked = false;
   document.getElementById('listings-title').textContent = 'Properties in Norway';
   // Clear smart search too
+  smartSearchMunicipalities = '';
   var ssInput = document.getElementById('smart-search-input');
   var ssStatus = document.getElementById('smart-search-status');
   if (ssInput) ssInput.value = '';
@@ -799,8 +812,15 @@ function applySmartFilters(params) {
   if (taxFreeReset) taxFreeReset.checked = false;
 
   // Apply returned params
+  smartSearchMunicipalities = ''; // reset
   if (params.municipality) {
-    document.getElementById('filter-municipality').value = params.municipality;
+    var codes = String(params.municipality).split(',');
+    if (codes.length === 1) {
+      document.getElementById('filter-municipality').value = codes[0];
+    } else {
+      // Multi-municipality from distance query — store separately, don't touch dropdown
+      smartSearchMunicipalities = params.municipality;
+    }
   }
   if (params.category) {
     document.getElementById('filter-category').value = params.category;
@@ -856,9 +876,14 @@ function buildStatusSummary(params) {
   else if (params.category === 'all') parts.push('All listings');
 
   if (params.municipality) {
-    var muniEl = document.getElementById('filter-municipality');
-    var opt = muniEl.querySelector('option[value="' + params.municipality + '"]');
-    if (opt) parts.push('in ' + opt.textContent);
+    var codes = String(params.municipality).split(',');
+    if (codes.length === 1) {
+      var muniEl = document.getElementById('filter-municipality');
+      var opt = muniEl.querySelector('option[value="' + codes[0] + '"]');
+      if (opt) parts.push('in ' + opt.textContent);
+    } else {
+      parts.push('in ' + codes.length + ' municipalities');
+    }
   }
 
   if (params.max_price) {
