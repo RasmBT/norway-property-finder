@@ -6,6 +6,8 @@ var listings = [];
 var showTaxMunicipalities = true;
 var currency = 'NOK';
 var eurRate = null;
+var statsCountByMuni = {};
+var hoverMarker = null;
 
 // Initialize
 document.addEventListener('DOMContentLoaded', async function() {
@@ -131,8 +133,8 @@ function initDragHandle() {
     if (!isDragging) return;
     var clientY = e.touches ? e.touches[0].clientY : e.clientY;
     var delta = clientY - startY;
-    var contentHeight = content.offsetHeight;
-    var newHeight = Math.max(150, Math.min(contentHeight - 100, startHeight + delta));
+    var maxHeight = window.innerHeight - 120;
+    var newHeight = Math.max(150, Math.min(maxHeight, startHeight + delta));
     mapContainer.style.height = newHeight + 'px';
     map.invalidateSize();
   }
@@ -152,12 +154,12 @@ function initDragHandle() {
   document.addEventListener('touchend', onEnd);
 
   handle.addEventListener('dblclick', function() {
-    var contentHeight = content.offsetHeight;
+    var maxHeight = window.innerHeight - 120;
     var currentHeight = mapContainer.offsetHeight;
-    if (currentHeight > contentHeight * 0.7) {
+    if (currentHeight > maxHeight * 0.7) {
       mapContainer.style.height = '400px';
     } else {
-      mapContainer.style.height = (contentHeight - 80) + 'px';
+      mapContainer.style.height = maxHeight + 'px';
     }
     map.invalidateSize();
   });
@@ -184,15 +186,12 @@ function plotMunicipalities() {
   markers.forEach(function(m) { map.removeLayer(m); });
   markers = [];
 
-  var filtersActive = hasActiveFilters();
   var category = document.getElementById('filter-category').value;
   var section = category === 'tomt' ? 'plots' : 'homes';
 
-  // Pre-compute listing counts per municipality from filtered results
-  var countByMuni = {};
-  listings.forEach(function(l) {
-    countByMuni[l.municipality_code] = (countByMuni[l.municipality_code] || 0) + 1;
-  });
+  // Use non-municipality-filtered counts so all municipalities stay visible/clickable
+  var countByMuni = Object.keys(statsCountByMuni).length > 0 ? statsCountByMuni : {};
+  var filtersActive = Object.keys(countByMuni).length > 0;
 
   municipalities.forEach(function(muni) {
     if (muni.hasPropertyTax && !showTaxMunicipalities) return;
@@ -240,10 +239,12 @@ function plotMunicipalities() {
       popupHtml += '<a class="popup-link" href="#" onclick="event.preventDefault(); filterByMunicipality(\'' + muni.code + '\')">' +
         (listingCount > 0 ? 'Show listings' : 'Filter this municipality') +
       '</a><br>';
+    } else {
+      popupHtml += '<div style="margin-top:6px;font-size:11px;color:#8b8fa3;">Not tracked (has property tax)</div>';
     }
 
     popupHtml += '<a class="popup-link" href="https://www.finn.no/realestate/' + section + '/search.html?q=' +
-      encodeURIComponent(muni.name.split(' - ')[0]) + '" target="_blank" rel="noopener">Open on Finn.no</a>';
+      encodeURIComponent(muni.name.split(' - ')[0]) + '" target="_blank" rel="noopener">Browse on Finn.no</a>';
 
     marker.bindPopup(popupHtml);
     markers.push(marker);
@@ -308,7 +309,7 @@ async function loadListings() {
     var resp = await fetch('/api/listings?' + params);
     listings = await resp.json();
     renderListings(listings);
-    updateStats();
+    await updateStats();
     plotMunicipalities();
   } catch (err) {
     console.error('Failed to load listings:', err);
@@ -362,6 +363,9 @@ async function updateStats() {
     }
     byCounts[l.municipality_code]++;
   });
+
+  // Store globally so plotMunicipalities can use non-municipality-filtered counts
+  statsCountByMuni = byCounts;
 
   var selectedMuni = document.getElementById('filter-municipality').value;
 
@@ -474,7 +478,12 @@ function renderListings(items) {
       }
     }
 
-    return '<a class="listing-card' + (listing.is_new ? ' is-new' : '') + '" href="' + listing.finn_url + '" target="_blank" rel="noopener">' +
+    var hoverAttrs = '';
+    if (listing.latitude && listing.longitude) {
+      hoverAttrs = ' onmouseenter="highlightOnMap(' + listing.latitude + ',' + listing.longitude + ')" onmouseleave="removeMapHighlight()"';
+    }
+
+    return '<a class="listing-card' + (listing.is_new ? ' is-new' : '') + '" href="' + listing.finn_url + '" target="_blank" rel="noopener"' + hoverAttrs + '>' +
       imgHtml +
       '<div class="listing-body">' +
         '<div class="listing-badges">' + badges + '</div>' +
@@ -546,7 +555,17 @@ function onCategoryChange() {
   applyFilters();
 }
 
+function onListingsSortChange(value) {
+  document.getElementById('filter-sort').value = value;
+  applyFilters();
+}
+
 async function applyFilters() {
+  // Keep listings sort in sync with sidebar sort
+  var sidebarSort = document.getElementById('filter-sort').value;
+  var listingsSort = document.getElementById('listings-sort');
+  if (listingsSort) listingsSort.value = sidebarSort;
+
   await loadListings();
 
   var titleEl = document.getElementById('listings-title');
@@ -574,6 +593,8 @@ function clearFilters() {
   document.getElementById('filter-min-area').value = '';
   document.getElementById('filter-property-type').value = '';
   document.getElementById('filter-sort').value = 'newest';
+  var listingsSort = document.getElementById('listings-sort');
+  if (listingsSort) listingsSort.value = 'newest';
   document.getElementById('filter-new-only').checked = false;
   document.getElementById('filter-category').value = 'home';
   document.getElementById('filter-developed').value = '';
@@ -643,6 +664,178 @@ function togglePlotDetails(id, toggleEl) {
   var isHidden = el.style.display === 'none';
   el.style.display = isHidden ? 'block' : 'none';
   toggleEl.innerHTML = isHidden ? 'Plot details &#9652;' : 'Plot details &#9662;';
+}
+
+// --- SMART SEARCH ---
+async function runSmartSearch() {
+  var input = document.getElementById('smart-search-input');
+  var status = document.getElementById('smart-search-status');
+  var btn = document.querySelector('.smart-search-btn');
+  var query = input.value.trim();
+
+  if (!query) {
+    status.className = 'smart-search-status error';
+    status.textContent = 'Type a search query first';
+    return;
+  }
+
+  btn.disabled = true;
+  status.className = 'smart-search-status loading';
+  status.textContent = 'Interpreting your search...';
+
+  try {
+    var resp = await fetch('/api/smart-search', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query: query }),
+    });
+
+    if (!resp.ok) {
+      var err = await resp.json().catch(function() { return {}; });
+      throw new Error(err.error || 'Search failed');
+    }
+
+    var data = await resp.json();
+    var filters = data.filters;
+
+    if (!filters || Object.keys(filters).length === 0) {
+      status.className = 'smart-search-status error';
+      status.textContent = 'Could not understand the query. Try being more specific.';
+      btn.disabled = false;
+      return;
+    }
+
+    applySmartFilters(filters);
+    status.className = 'smart-search-status success';
+    status.textContent = buildStatusSummary(filters);
+  } catch (err) {
+    status.className = 'smart-search-status error';
+    status.textContent = err.message || 'Search failed';
+  }
+
+  btn.disabled = false;
+}
+
+function applySmartFilters(params) {
+  // Reset all filters to defaults
+  document.getElementById('filter-municipality').value = '';
+  document.getElementById('filter-min-price').value = '';
+  document.getElementById('filter-max-price').value = '';
+  document.getElementById('filter-min-area').value = '';
+  document.getElementById('filter-property-type').value = '';
+  document.getElementById('filter-sort').value = 'newest';
+  var lsort = document.getElementById('listings-sort');
+  if (lsort) lsort.value = 'newest';
+  document.getElementById('filter-new-only').checked = false;
+  document.getElementById('filter-category').value = 'home';
+  document.getElementById('filter-developed').value = '';
+  document.getElementById('filter-obligation').value = 'all';
+  document.getElementById('filter-ownership').value = '';
+  var noFees = document.getElementById('filter-no-fees');
+  if (noFees) noFees.checked = false;
+
+  // Apply returned params
+  if (params.municipality) {
+    document.getElementById('filter-municipality').value = params.municipality;
+  }
+  if (params.category) {
+    document.getElementById('filter-category').value = params.category;
+  }
+  if (params.min_price) {
+    var minP = Number(params.min_price);
+    if (currency === 'EUR' && eurRate) minP = Math.round(minP * eurRate);
+    document.getElementById('filter-min-price').value = minP;
+  }
+  if (params.max_price) {
+    var maxP = Number(params.max_price);
+    if (currency === 'EUR' && eurRate) maxP = Math.round(maxP * eurRate);
+    document.getElementById('filter-max-price').value = maxP;
+  }
+  if (params.min_area) {
+    document.getElementById('filter-min-area').value = params.min_area;
+  }
+  if (params.property_type) {
+    document.getElementById('filter-property-type').value = params.property_type;
+  }
+  if (params.sort) {
+    document.getElementById('filter-sort').value = params.sort;
+  }
+  if (params.new_only === '1') {
+    document.getElementById('filter-new-only').checked = true;
+  }
+  if (params.no_fees === '1' && noFees) {
+    noFees.checked = true;
+  }
+  if (params.developed) {
+    document.getElementById('filter-developed').value = params.developed;
+  }
+  if (params.building_obligation) {
+    document.getElementById('filter-obligation').value = params.building_obligation;
+  }
+  if (params.plot_owned) {
+    document.getElementById('filter-ownership').value = params.plot_owned;
+  }
+
+  // Show/hide plot-specific filters and trigger search
+  onCategoryChange();
+}
+
+function buildStatusSummary(params) {
+  var parts = [];
+
+  if (params.category === 'tomt') parts.push('Plots');
+  else if (params.category === 'home') parts.push('Homes');
+  else if (params.category === 'all') parts.push('All listings');
+
+  if (params.municipality) {
+    var muniEl = document.getElementById('filter-municipality');
+    var opt = muniEl.querySelector('option[value="' + params.municipality + '"]');
+    if (opt) parts.push('in ' + opt.textContent);
+  }
+
+  if (params.max_price) {
+    var p = Number(params.max_price);
+    if (p >= 1000000) parts.push('under ' + (p / 1000000) + 'M kr');
+    else parts.push('under ' + p.toLocaleString('nb-NO') + ' kr');
+  }
+  if (params.min_price) {
+    var mp = Number(params.min_price);
+    if (mp >= 1000000) parts.push('from ' + (mp / 1000000) + 'M kr');
+    else parts.push('from ' + mp.toLocaleString('nb-NO') + ' kr');
+  }
+  if (params.min_area) parts.push(params.min_area + '+ m\u00b2');
+  if (params.property_type) parts.push(params.property_type);
+  if (params.building_obligation === 'none') parts.push('no obligation');
+  if (params.plot_owned === 'selveier') parts.push('freehold');
+  if (params.plot_owned === 'tomtefeste') parts.push('leasehold');
+  if (params.no_fees === '1') parts.push('no fees');
+  if (params.new_only === '1') parts.push('new only');
+  if (params.sort === 'price_asc') parts.push('cheapest first');
+  if (params.sort === 'area_desc') parts.push('largest first');
+
+  return parts.length > 0 ? parts.join(', ') : 'Filters applied';
+}
+
+// --- MAP HOVER ---
+function highlightOnMap(lat, lng) {
+  removeMapHighlight();
+  if (!lat || !lng) return;
+  hoverMarker = L.circleMarker([lat, lng], {
+    radius: 14,
+    fillColor: '#3b82f6',
+    color: '#fff',
+    weight: 3,
+    opacity: 1,
+    fillOpacity: 0.7,
+  }).addTo(map);
+  map.setView([lat, lng], Math.max(map.getZoom(), 9), { animate: true });
+}
+
+function removeMapHighlight() {
+  if (hoverMarker) {
+    map.removeLayer(hoverMarker);
+    hoverMarker = null;
+  }
 }
 
 // --- UTILITIES ---

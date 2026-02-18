@@ -7,6 +7,9 @@ const { fetchListingsForMunicipality, fetchPlotsForMunicipality } = require('./s
 const app = express();
 const PORT = process.env.PORT || 3456;
 
+// Parse JSON request bodies
+app.use(express.json());
+
 // Database setup
 const db = new Database(path.join(__dirname, 'data', 'listings.db'));
 db.pragma('journal_mode = WAL');
@@ -182,6 +185,7 @@ app.get('/api/listings', (req, res) => {
     case 'price_asc': sql += ' ORDER BY price ASC NULLS LAST'; break;
     case 'price_desc': sql += ' ORDER BY price DESC NULLS LAST'; break;
     case 'area_desc': sql += ' ORDER BY area_m2 DESC NULLS LAST'; break;
+    case 'area_asc': sql += ' ORDER BY area_m2 ASC NULLS LAST'; break;
     case 'newest': sql += ' ORDER BY first_seen DESC'; break;
     default: sql += ' ORDER BY first_seen DESC';
   }
@@ -229,6 +233,123 @@ app.get('/api/updates', (req, res) => {
     'SELECT * FROM update_log ORDER BY updated_at DESC LIMIT 50'
   ).all();
   res.json(updates);
+});
+
+// --- Smart Search via DeepSeek ---
+const SMART_SEARCH_SYSTEM_PROMPT = `You are a filter-extraction assistant for a Norwegian property finder app.
+Given a natural language query, return a JSON object with the matching filter parameters.
+
+TAX-FREE MUNICIPALITIES (code → name):
+4226=Hægebostad, 3220=Enebakk, 3207=Nordre Follo, 5528=Dyrøy, 5035=Stjørdal,
+3911=Færder, 3238=Nannestad, 3909=Larvik, 1124=Sola, 3310=Hole,
+3203=Asker, 4624=Bjørnafjorden, 5526=Sørreisa, 1514=Sande, 3312=Lier,
+3301=Drammen, 3905=Tønsberg, 3447=Søndre Land, 5610=Kárášjohka/Karasjok,
+3907=Sandefjord, 1120=Klepp, 1119=Hå, 3201=Bærum, 1868=Øksnes,
+3314=Øvre Eiker, 1511=Vanylven, 4612=Sveio, 3224=Rælingen, 3230=Gjerdrum,
+4625=Austevoll, 1835=Træna, 5616=Hasvik
+
+FILTER FIELDS (only include keys that the user's query implies):
+- municipality: one of the municipality codes above (string)
+- category: "home", "tomt", or "all"
+- min_price: integer in NOK
+- max_price: integer in NOK
+- min_area: integer in m²
+- property_type: "Enebolig", "Gårdsbruk/Småbruk", "Rekkehus", or "Tomannsbolig"
+- developed: "1" (developed/boligtomt) or "0" (undeveloped)
+- building_obligation: "none", "has_clause", "has_deadline", or "unknown"
+- plot_owned: "selveier" (freehold) or "tomtefeste" (leasehold)
+- sort: "newest", "price_asc", "price_desc", "area_desc", or "area_asc"
+- new_only: "1" (only new listings)
+- no_fees: "1" (no shared monthly costs)
+
+RULES:
+- All prices must be in NOK. 1 million = 1000000. "2M" = 2000000. "500k" = 500000.
+- "cheap" or "affordable" → sort by price_asc, do NOT guess a max_price.
+- "large" or "big" → sort by area_desc.
+- "plot" or "tomt" or "land" → category: "tomt".
+- "house" or "home" or "cabin" → category: "home".
+- "freehold" or "selveier" → plot_owned: "selveier".
+- "leasehold" or "tomtefeste" → plot_owned: "tomtefeste".
+- "no obligation" or "no byggeklausul" → building_obligation: "none".
+- "near Oslo" → municipality could be Bærum (3201) or Asker (3203). Pick the one mentioned or omit if unclear.
+- "detached" or "enebolig" → property_type: "Enebolig".
+- "farm" or "småbruk" → property_type: "Gårdsbruk/Småbruk".
+- Match municipality names case-insensitively and with partial matching (e.g. "asker" → 3203, "bærum" → 3201, "drammen" → 3301).
+- Only output valid JSON. No extra text, no markdown.
+
+EXAMPLES:
+Input: "cheap plot in Asker under 2 million with no building obligation"
+Output: {"municipality":"3203","category":"tomt","max_price":2000000,"building_obligation":"none","sort":"price_asc"}
+
+Input: "large detached house"
+Output: {"category":"home","property_type":"Enebolig","sort":"area_desc"}
+
+Input: "freehold plots in Bærum"
+Output: {"municipality":"3201","category":"tomt","plot_owned":"selveier"}
+
+Input: "new listings under 5M"
+Output: {"max_price":5000000,"new_only":"1"}
+
+Input: "affordable homes in Sola with no fees"
+Output: {"municipality":"1124","category":"home","no_fees":"1","sort":"price_asc"}`;
+
+const ALLOWED_SMART_KEYS = new Set([
+  'municipality', 'category', 'min_price', 'max_price', 'min_area',
+  'property_type', 'developed', 'building_obligation', 'plot_owned',
+  'sort', 'new_only', 'no_fees'
+]);
+
+app.post('/api/smart-search', async (req, res) => {
+  const { query } = req.body;
+  if (!query || typeof query !== 'string' || query.trim().length === 0) {
+    return res.status(400).json({ error: 'Query is required' });
+  }
+
+  try {
+    const response = await fetch('https://api.deepseek.com/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer REDACTED_KEY',
+      },
+      body: JSON.stringify({
+        model: 'deepseek-chat',
+        temperature: 0,
+        response_format: { type: 'json_object' },
+        messages: [
+          { role: 'system', content: SMART_SEARCH_SYSTEM_PROMPT },
+          { role: 'user', content: query.trim() },
+        ],
+      }),
+    });
+
+    if (!response.ok) {
+      const errText = await response.text();
+      console.error('DeepSeek API error:', response.status, errText);
+      return res.status(502).json({ error: 'AI service unavailable' });
+    }
+
+    const data = await response.json();
+    const content = data.choices?.[0]?.message?.content;
+    if (!content) {
+      return res.status(502).json({ error: 'No response from AI' });
+    }
+
+    const parsed = JSON.parse(content);
+
+    // Whitelist-sanitize: only keep allowed keys
+    const filters = {};
+    for (const [key, value] of Object.entries(parsed)) {
+      if (ALLOWED_SMART_KEYS.has(key) && value !== null && value !== undefined && value !== '') {
+        filters[key] = value;
+      }
+    }
+
+    res.json({ filters, raw_query: query.trim() });
+  } catch (err) {
+    console.error('Smart search error:', err.message);
+    res.status(500).json({ error: 'Failed to process search query' });
+  }
 });
 
 // Upsert listings into database

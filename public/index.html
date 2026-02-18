@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/style.css?v=8">
+  <link rel="stylesheet" href="/style.css?v=10">
   <meta http-equiv="cache-control" content="no-cache">
 </head>
 <body>
@@ -46,6 +46,23 @@
     <div class="main">
       <!-- Sidebar Filters -->
       <aside class="sidebar">
+        <!-- Smart Search -->
+        <div class="smart-search-section">
+          <div class="smart-search-row">
+            <input type="text" id="smart-search-input" class="smart-search-input"
+              placeholder='e.g. "cheap plot in Asker, no obligation"'
+              onkeydown="if(event.key==='Enter'){event.preventDefault();runSmartSearch();}">
+            <button class="smart-search-btn" onclick="runSmartSearch()" title="AI Search">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+            </button>
+          </div>
+          <div class="smart-search-status" id="smart-search-status"></div>
+        </div>
+        <div class="filter-divider"><span>or use filters below</span></div>
+
         <div class="filter-section">
           <h3>Municipality</h3>
           <select id="filter-municipality" onchange="applyFilters()">
@@ -125,7 +142,8 @@
             <option value="newest">Newest first</option>
             <option value="price_asc">Price: Low to High</option>
             <option value="price_desc">Price: High to Low</option>
-            <option value="area_desc">Largest first</option>
+            <option value="area_desc">Size: Largest first</option>
+            <option value="area_asc">Size: Smallest first</option>
           </select>
         </div>
 
@@ -171,7 +189,16 @@
         <!-- Listings Grid -->
         <div class="listings-header">
           <h2 id="listings-title">Properties in Tax-Free Municipalities</h2>
-          <span class="listings-count" id="listings-count"></span>
+          <div class="listings-header-right">
+            <select class="listings-sort" id="listings-sort" onchange="onListingsSortChange(this.value)">
+              <option value="newest">Newest</option>
+              <option value="price_asc">Price: Low-High</option>
+              <option value="price_desc">Price: High-Low</option>
+              <option value="area_desc">Size: Largest</option>
+              <option value="area_asc">Size: Smallest</option>
+            </select>
+            <span class="listings-count" id="listings-count"></span>
+          </div>
         </div>
         <div class="listings-grid" id="listings-grid">
           <div class="loading" id="loading">
@@ -184,6 +211,6 @@
   </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="/app.js?v=8"></script>
+  <script src="/app.js?v=10"></script>
 </body>
 </html>

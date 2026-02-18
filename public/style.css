@@ -160,6 +160,104 @@ body {
   padding: 16px;
 }
 
+/* Smart Search */
+.smart-search-section {
+  margin-bottom: 12px;
+}
+
+.smart-search-row {
+  display: flex;
+  gap: 6px;
+}
+
+.smart-search-input {
+  flex: 1;
+  background: var(--bg-card);
+  border: 1px solid var(--accent);
+  color: var(--text);
+  padding: 9px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: inherit;
+  min-width: 0;
+}
+
+.smart-search-input:focus {
+  outline: none;
+  border-color: var(--accent-hover);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.smart-search-input::placeholder {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.smart-search-btn {
+  background: var(--accent);
+  border: none;
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+
+.smart-search-btn:hover {
+  background: var(--accent-hover);
+}
+
+.smart-search-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.smart-search-status {
+  font-size: 12px;
+  margin-top: 6px;
+  line-height: 1.4;
+  min-height: 0;
+}
+
+.smart-search-status:empty {
+  display: none;
+}
+
+.smart-search-status.loading {
+  color: var(--text-muted);
+  display: block;
+  padding: 0;
+}
+
+.smart-search-status.success {
+  color: var(--green);
+}
+
+.smart-search-status.error {
+  color: var(--red);
+}
+
+.filter-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.filter-divider::before,
+.filter-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
 .filter-section {
   margin-bottom: 16px;
 }
@@ -412,6 +510,28 @@ body {
 .listings-header h2 {
   font-size: 16px;
   font-weight: 600;
+}
+
+.listings-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.listings-sort {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 5px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.listings-sort:focus {
+  outline: none;
+  border-color: var(--accent);
 }
 
 .listings-count {
