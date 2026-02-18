@@ -4,10 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Norway Property Finder - Tax-Free Municipalities</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/style.css?v=10">
+  <link rel="stylesheet" href="/style.css?v=12">
   <meta http-equiv="cache-control" content="no-cache">
 </head>
 <body>
@@ -73,15 +74,15 @@
         <div class="filter-section">
           <h3>Price Range</h3>
           <div class="range-inputs">
-            <input type="number" id="filter-min-price" placeholder="Min (kr)" onchange="applyFilters()">
+            <input type="number" id="filter-min-price" placeholder="Min (kr)" oninput="debouncedApplyFilters()">
             <span>-</span>
-            <input type="number" id="filter-max-price" placeholder="Max (kr)" onchange="applyFilters()">
+            <input type="number" id="filter-max-price" placeholder="Max (kr)" oninput="debouncedApplyFilters()">
           </div>
         </div>
 
         <div class="filter-section">
           <h3>Min Area (m²)</h3>
-          <input type="number" id="filter-min-area" placeholder="e.g. 100" onchange="applyFilters()">
+          <input type="number" id="filter-min-area" placeholder="e.g. 100" oninput="debouncedApplyFilters()">
         </div>
 
         <div class="filter-section">
@@ -130,9 +131,10 @@
           <select id="filter-property-type" onchange="applyFilters()">
             <option value="">All types</option>
             <option value="Enebolig">Enebolig (Detached)</option>
-            <option value="Gårdsbruk/Småbruk">Gårdsbruk/Småbruk (Farm)</option>
+            <option value="Leilighet">Leilighet (Apartment)</option>
             <option value="Rekkehus">Rekkehus (Townhouse)</option>
             <option value="Tomannsbolig">Tomannsbolig (Duplex)</option>
+            <option value="Gårdsbruk/Småbruk">Gårdsbruk/Småbruk (Farm)</option>
           </select>
         </div>
 
@@ -164,7 +166,7 @@
           </p>
         </div>
 
-        <button class="btn-clear" onclick="clearFilters()">Clear Filters</button>
+        <button class="btn-clear" id="btn-clear" onclick="clearFilters()">Clear Filters</button>
 
         <!-- Municipality stats -->
         <div class="municipality-stats" id="municipality-stats">
@@ -210,7 +212,23 @@
     </div>
   </div>
 
+  <!-- Back to Top Button -->
+  <button class="back-to-top" id="back-to-top" onclick="scrollToTop()" title="Back to top">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <polyline points="18 15 12 9 6 15"></polyline>
+    </svg>
+  </button>
+
+  <!-- Floating Mini Map -->
+  <div class="mini-map-wrapper" id="mini-map-wrapper">
+    <div class="mini-map-header">
+      <span class="mini-map-label">Map</span>
+      <button class="mini-map-close" onclick="closeMiniMap()" title="Close">&times;</button>
+    </div>
+    <div id="mini-map"></div>
+  </div>
+
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="/app.js?v=10"></script>
+  <script src="/app.js?v=12"></script>
 </body>
 </html>

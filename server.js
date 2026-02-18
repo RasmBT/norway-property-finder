@@ -141,15 +141,15 @@ app.get('/api/listings', (req, res) => {
     sql += ' AND municipality_code = ?';
     params.push(municipality);
   }
-  if (min_price) {
+  if (min_price && !isNaN(Number(min_price))) {
     sql += ' AND price >= ?';
     params.push(Number(min_price));
   }
-  if (max_price) {
+  if (max_price && !isNaN(Number(max_price))) {
     sql += ' AND price <= ?';
     params.push(Number(max_price));
   }
-  if (min_area) {
+  if (min_area && !isNaN(Number(min_area))) {
     sql += ' AND area_m2 >= ?';
     params.push(Number(min_area));
   }
@@ -192,6 +192,31 @@ app.get('/api/listings', (req, res) => {
 
   const listings = db.prepare(sql).all(...params);
   res.json(listings);
+});
+
+// API: Get listing counts grouped by municipality (lightweight alternative to fetching all listings)
+app.get('/api/listing-counts', (req, res) => {
+  const { min_price, max_price, min_area, property_type, sort, new_only, category, developed, building_obligation, plot_owned } = req.query;
+
+  let sql = 'SELECT municipality_code, municipality_name, COUNT(*) as count FROM listings WHERE 1=1';
+  const params = [];
+
+  if (min_price && !isNaN(Number(min_price))) { sql += ' AND price >= ?'; params.push(Number(min_price)); }
+  if (max_price && !isNaN(Number(max_price))) { sql += ' AND price <= ?'; params.push(Number(max_price)); }
+  if (min_area && !isNaN(Number(min_area))) { sql += ' AND area_m2 >= ?'; params.push(Number(min_area)); }
+  if (property_type) { sql += ' AND property_type = ?'; params.push(property_type); }
+  if (new_only === '1') { sql += ' AND is_new = 1'; }
+  if (req.query.no_fees === '1') { sql += ' AND shared_cost = 0'; }
+  if (category && category !== 'all') { sql += ' AND category = ?'; params.push(category); }
+  if (developed === '1') { sql += ' AND is_developed = 1'; }
+  else if (developed === '0') { sql += ' AND is_developed = 0'; }
+  if (building_obligation && building_obligation !== 'all') { sql += ' AND building_obligation = ?'; params.push(building_obligation); }
+  if (plot_owned) { sql += ' AND plot_owned = ?'; params.push(plot_owned); }
+
+  sql += ' GROUP BY municipality_code ORDER BY count DESC';
+
+  const counts = db.prepare(sql).all(...params);
+  res.json(counts);
 });
 
 // API: Get listing stats

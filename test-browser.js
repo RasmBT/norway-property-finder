@@ -214,7 +214,7 @@ const { chromium } = require('playwright');
       }
       return opacities;
     });
-    const hasDimDots = markerOpacities.some(o => o < 0.1);
+    const hasDimDots = markerOpacities.some(o => o < 0.25);
     const hasBrightDots = markerOpacities.some(o => o > 0.5);
     log('Map has dimmed dots (filtered out)', hasDimDots, 'Opacities range: ' +
       Math.min(...markerOpacities).toFixed(3) + ' to ' + Math.max(...markerOpacities).toFixed(2));

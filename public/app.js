@@ -8,10 +8,14 @@ var currency = 'NOK';
 var eurRate = null;
 var statsCountByMuni = {};
 var hoverMarker = null;
+var miniMap = null;
+var miniHoverMarker = null;
+var miniMapDismissed = false;
 
 // Initialize
 document.addEventListener('DOMContentLoaded', async function() {
   initMap();
+  initMiniMap();
   initDragHandle();
   await loadExchangeRate();
   await loadMunicipalities();
@@ -111,6 +115,52 @@ function initMap() {
   document.querySelector('.map-container').appendChild(controlsDiv);
 }
 
+// --- MINI MAP ---
+function initMiniMap() {
+  miniMap = L.map('mini-map', {
+    zoomControl: false,
+    attributionControl: false,
+    dragging: false,
+    scrollWheelZoom: false,
+    doubleClickZoom: false,
+    touchZoom: false,
+  }).setView([64.5, 14], 5);
+
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    maxZoom: 18,
+  }).addTo(miniMap);
+
+  // Sync mini-map when main map moves (zoom out 2 levels for wider context)
+  map.on('moveend zoomend', function() {
+    miniMap.setView(map.getCenter(), Math.max(map.getZoom() - 2, 4), { animate: false });
+  });
+
+  // Show/hide mini-map based on main map visibility
+  var mapContainer = document.querySelector('.map-container');
+  var wrapper = document.getElementById('mini-map-wrapper');
+
+  var observer = new IntersectionObserver(function(entries) {
+    var mainMapVisible = entries[0].isIntersecting;
+    if (miniMapDismissed) return;
+    if (mainMapVisible) {
+      wrapper.classList.remove('visible');
+    } else {
+      wrapper.classList.add('visible');
+      miniMap.invalidateSize();
+      miniMap.setView(map.getCenter(), Math.max(map.getZoom() - 2, 4), { animate: false });
+    }
+  }, { threshold: 0.1 });
+
+  observer.observe(mapContainer);
+}
+
+function closeMiniMap() {
+  miniMapDismissed = true;
+  var wrapper = document.getElementById('mini-map-wrapper');
+  wrapper.classList.remove('visible');
+  wrapper.classList.add('dismissed');
+}
+
 // --- DRAG HANDLE ---
 function initDragHandle() {
   var handle = document.getElementById('drag-handle');
@@ -207,8 +257,8 @@ function plotMunicipalities() {
     } else if (filtersActive && listingCount === 0) {
       // No-tax municipality with 0 filtered results: dim it heavily
       color = '#22c55e';
-      radius = 3;
-      opacity = 0.08;
+      radius = 4;
+      opacity = 0.2;
     } else {
       // No-tax municipality with listings (or no filters active)
       color = '#22c55e';
@@ -343,25 +393,22 @@ async function updateStats() {
   document.getElementById('total-count').textContent = total;
   document.getElementById('new-count').textContent = newCount;
 
-  // Sidebar stats: fetch WITHOUT municipality filter so all municipalities are always clickable
+  // Sidebar stats: fetch counts WITHOUT municipality filter so all municipalities stay clickable
   var statsParams = buildFilterParams();
   var p = new URLSearchParams(statsParams);
   p.delete('municipality');
   try {
-    var resp = await fetch('/api/listings?' + p.toString());
-    var statsListings = await resp.json();
+    var resp = await fetch('/api/listing-counts?' + p.toString());
+    var countData = await resp.json();
   } catch (e) {
     return;
   }
 
   var byCounts = {};
   var byNames = {};
-  statsListings.forEach(function(l) {
-    if (!byCounts[l.municipality_code]) {
-      byCounts[l.municipality_code] = 0;
-      byNames[l.municipality_code] = l.municipality_name;
-    }
-    byCounts[l.municipality_code]++;
+  countData.forEach(function(row) {
+    byCounts[row.municipality_code] = row.count;
+    byNames[row.municipality_code] = row.municipality_name;
   });
 
   // Store globally so plotMunicipalities can use non-municipality-filtered counts
@@ -386,7 +433,7 @@ async function updateStats() {
 function renderListings(items) {
   var grid = document.getElementById('listings-grid');
   var countEl = document.getElementById('listings-count');
-  countEl.textContent = items.length + ' properties';
+  countEl.textContent = items.length.toLocaleString('nb-NO') + ' properties';
 
   if (items.length === 0) {
     grid.innerHTML = '<div class="empty-state">' +
@@ -566,6 +613,7 @@ async function applyFilters() {
   var listingsSort = document.getElementById('listings-sort');
   if (listingsSort) listingsSort.value = sidebarSort;
 
+  updateFilterCount();
   await loadListings();
 
   var titleEl = document.getElementById('listings-title');
@@ -606,6 +654,11 @@ function clearFilters() {
   var noFees = document.getElementById('filter-no-fees');
   if (noFees) noFees.checked = false;
   document.getElementById('listings-title').textContent = 'Properties in Tax-Free Municipalities';
+  // Clear smart search too
+  var ssInput = document.getElementById('smart-search-input');
+  var ssStatus = document.getElementById('smart-search-status');
+  if (ssInput) ssInput.value = '';
+  if (ssStatus) { ssStatus.className = 'smart-search-status'; ssStatus.textContent = ''; }
   applyFilters();
 }
 
@@ -811,7 +864,9 @@ function buildStatusSummary(params) {
   if (params.no_fees === '1') parts.push('no fees');
   if (params.new_only === '1') parts.push('new only');
   if (params.sort === 'price_asc') parts.push('cheapest first');
+  if (params.sort === 'price_desc') parts.push('most expensive first');
   if (params.sort === 'area_desc') parts.push('largest first');
+  if (params.sort === 'area_asc') parts.push('smallest first');
 
   return parts.length > 0 ? parts.join(', ') : 'Filters applied';
 }
@@ -820,15 +875,30 @@ function buildStatusSummary(params) {
 function highlightOnMap(lat, lng) {
   removeMapHighlight();
   if (!lat || !lng) return;
-  hoverMarker = L.circleMarker([lat, lng], {
+  var markerOpts = {
     radius: 14,
     fillColor: '#3b82f6',
     color: '#fff',
     weight: 3,
     opacity: 1,
     fillOpacity: 0.7,
-  }).addTo(map);
-  map.setView([lat, lng], Math.max(map.getZoom(), 9), { animate: true });
+  };
+  hoverMarker = L.circleMarker([lat, lng], markerOpts).addTo(map);
+  // Only pan if the point is outside the current view, never zoom
+  if (!map.getBounds().contains([lat, lng])) {
+    map.panTo([lat, lng], { animate: true });
+  }
+  // Also highlight on mini-map
+  if (miniMap) {
+    miniHoverMarker = L.circleMarker([lat, lng], {
+      radius: 10,
+      fillColor: '#3b82f6',
+      color: '#fff',
+      weight: 2,
+      opacity: 1,
+      fillOpacity: 0.8,
+    }).addTo(miniMap);
+  }
 }
 
 function removeMapHighlight() {
@@ -836,14 +906,80 @@ function removeMapHighlight() {
     map.removeLayer(hoverMarker);
     hoverMarker = null;
   }
+  if (miniHoverMarker && miniMap) {
+    miniMap.removeLayer(miniHoverMarker);
+    miniHoverMarker = null;
+  }
 }
 
 // --- UTILITIES ---
+var escapeMap = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
 function escapeHtml(str) {
   if (!str) return '';
-  var div = document.createElement('div');
-  div.textContent = str;
-  return div.innerHTML;
+  return String(str).replace(/[&<>"']/g, function(c) { return escapeMap[c]; });
+}
+
+// Debounced filter apply for text inputs
+var debounceTimer = null;
+function debouncedApplyFilters() {
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(function() { applyFilters(); }, 400);
+}
+
+// Back to top
+function scrollToTop() {
+  var content = document.querySelector('.content');
+  if (content) content.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Show/hide back-to-top button based on scroll
+(function() {
+  var lastCheck = 0;
+  function checkBackToTop() {
+    var now = Date.now();
+    if (now - lastCheck < 100) return;
+    lastCheck = now;
+    var content = document.querySelector('.content');
+    var btn = document.getElementById('back-to-top');
+    if (!content || !btn) return;
+    if (content.scrollTop > 600) {
+      btn.classList.add('visible');
+    } else {
+      btn.classList.remove('visible');
+    }
+  }
+  document.addEventListener('DOMContentLoaded', function() {
+    var content = document.querySelector('.content');
+    if (content) content.addEventListener('scroll', checkBackToTop, { passive: true });
+  });
+})();
+
+// Update active filter count on Clear Filters button
+function updateFilterCount() {
+  var count = 0;
+  if (document.getElementById('filter-municipality').value !== '') count++;
+  if (document.getElementById('filter-min-price').value !== '') count++;
+  if (document.getElementById('filter-max-price').value !== '') count++;
+  if (document.getElementById('filter-min-area').value !== '') count++;
+  if (document.getElementById('filter-property-type').value !== '') count++;
+  if (document.getElementById('filter-new-only').checked) count++;
+  var noFees = document.getElementById('filter-no-fees');
+  if (noFees && noFees.checked) count++;
+  if (document.getElementById('filter-category').value !== 'home') count++;
+  if (document.getElementById('filter-developed').value !== '') count++;
+  if (document.getElementById('filter-obligation').value !== 'all') count++;
+  if (document.getElementById('filter-ownership').value !== '') count++;
+  if (document.getElementById('filter-sort').value !== 'newest') count++;
+
+  var btn = document.getElementById('btn-clear');
+  if (!btn) return;
+  if (count > 0) {
+    btn.textContent = 'Clear Filters (' + count + ')';
+    btn.classList.add('has-filters');
+  } else {
+    btn.textContent = 'Clear Filters';
+    btn.classList.remove('has-filters');
+  }
 }
 
 function timeAgo(date) {
