@@ -84,6 +84,7 @@ async function fetchPlotsForMunicipality(municipality) {
         plots[i].regulations = details.regulations;
         plots[i].yearlyCostsText = details.yearlyCostsText;
         plots[i].utilities = details.utilities;
+        plots[i].isDeveloped = details.isDeveloped;
       } catch (err) {
         plots[i].buildingObligation = 'unknown';
         plots[i].buildingObligationText = null;
@@ -185,10 +186,8 @@ async function scrapeSearchPage(url, municipality, hasLocationFilter, category) 
     const sharedCost = doc.price_shared_cost?.amount || 0;
     const propType = (doc.property_type_description || '').toLowerCase();
 
+    // isDeveloped will be determined from detail page facilities, not search results
     let isDeveloped = null;
-    if (category === 'tomt') {
-      isDeveloped = propType.includes('boligtomt') ? 1 : 0;
-    }
 
     const adSection = category === 'tomt' ? 'plots' : 'homes';
 
@@ -412,6 +411,9 @@ async function fetchPlotDetails(finnUrl) {
   details.buildingObligation = oblResult.obligation;
   details.buildingObligationText = oblResult.text;
 
+  // 10. Developed status — check if infrastructure (water/sewer/electricity) is connected
+  details.isDeveloped = classifyDeveloped(details.facilities, details.utilities, fullText);
+
   return details;
 }
 
@@ -448,6 +450,43 @@ function classifyObligation(text) {
   }
 
   return { obligation: 'unknown', text: null };
+}
+
+/**
+ * Classify whether a plot is developed (infrastructure connected) or undeveloped.
+ * Developed = water, sewer, electricity, and road access are already connected/available.
+ * Returns: 1 (developed), 0 (undeveloped), or null (unknown/insufficient data).
+ */
+function classifyDeveloped(facilities, utilities, fullText) {
+  const facilLower = (facilities || '').toLowerCase();
+  const utilLower = (utilities || '').toLowerCase();
+  const combined = facilLower + ' ' + utilLower + ' ' + (fullText || '');
+
+  // Strong indicator: "Offentlig vann/kloakk" in facilities means public water/sewer connected
+  const hasPublicWater = facilLower.includes('offentlig vann');
+
+  // Check utilities text for connected infrastructure
+  const waterConnected = /vann.*tilkoblet|tilknyttet.*vann|koblet.*vann|vann.*lagt.*til|etablert.*vann|vann og avløp.*til tomtegrense|vann.*i tomtegrense/i.test(combined);
+  const sewerConnected = /avløp.*tilkoblet|tilknyttet.*avløp|koblet.*avløp|kloakk.*tilkoblet/i.test(combined);
+  const roadAccess = facilLower.includes('bilvei frem') || /adkomst.*vei|tilkomst.*vei|tilknyttet.*vei|vei.*til tomten/i.test(combined);
+  const powerConnected = /strøm.*til.*tomt|el.*satt av|byggestrøm|strøm.*lagt/i.test(combined);
+
+  // Check for NOT connected indicators
+  const notConnected = /ikke tilkoblet|ikke tilknyttet|ikke koblet|tomten er ikke.*vann|må selv.*tilknytt|kjøper.*besørge tilkn/i.test(combined);
+
+  // Developed: has public water/sewer OR multiple infrastructure items connected
+  if (hasPublicWater && roadAccess) return 1;
+  if (hasPublicWater && !notConnected) return 1;
+  if (waterConnected && !notConnected) return 1;
+
+  // Undeveloped: explicitly not connected
+  if (notConnected) return 0;
+
+  // If we have facilities data but no water/sewer mentioned, likely undeveloped
+  if (facilities && !hasPublicWater && !waterConnected) return 0;
+
+  // No data to determine
+  return null;
 }
 
 /**

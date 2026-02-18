@@ -384,6 +384,7 @@ body {
   min-height: 300px;
   position: relative;
   border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
 }
 
 #map {
@@ -809,7 +810,7 @@ body {
   position: absolute;
   top: 10px;
   right: 10px;
-  z-index: 1000;
+  z-index: 500;
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -883,6 +884,31 @@ body {
 }
 
 /* Responsive */
+@media (max-width: 640px) {
+  .header {
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 10px 16px;
+  }
+
+  .header h1 {
+    font-size: 15px;
+  }
+
+  .header-right {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .badge {
+    display: none;
+  }
+
+  .last-update {
+    display: none;
+  }
+}
+
 @media (max-width: 900px) {
   .main {
     flex-direction: column;

@@ -453,8 +453,8 @@ function renderListings(items) {
     var badges = '';
     if (listing.is_new) badges += '<span class="listing-badge new-badge">NEW</span>';
     if (isTomt) badges += '<span class="listing-badge tomt-badge">TOMT</span>';
-    if (isTomt && listing.is_developed === 1) badges += '<span class="listing-badge developed-badge">Developed</span>';
-    if (isTomt && listing.is_developed === 0) badges += '<span class="listing-badge undeveloped-badge">Undeveloped</span>';
+    if (isTomt && listing.is_developed === 1) badges += '<span class="listing-badge developed-badge" title="Water, sewer & road connected">Utilities connected</span>';
+    if (isTomt && listing.is_developed === 0) badges += '<span class="listing-badge undeveloped-badge" title="No utilities connected yet">No utilities</span>';
 
     if (isTomt && listing.plot_owned === 'selveier') {
       badges += '<span class="listing-badge ownership-selveier">Selveier</span>';
