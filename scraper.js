@@ -239,6 +239,12 @@ async function scrapeSearchPage(url, municipality, hasLocationFilter, category) 
     });
   }
 
+  // Exclude standalone garage/parking listings
+  filtered = filtered.filter(doc => {
+    const propType = (doc.property_type_description || '').toLowerCase();
+    return !propType.includes('garasje') && !propType.includes('parkering');
+  });
+
   const listings = filtered.map(doc => {
     const price = doc.price_suggestion?.amount || 0;
     const sharedCost = doc.price_shared_cost?.amount || 0;
