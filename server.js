@@ -526,11 +526,13 @@ function upsertListings(municipalityCode, municipalityName, listings, hasPropert
 
   transaction(listings);
 
-  // Remove stale listings (not seen in 7 days)
-  db.prepare(`
-    DELETE FROM listings
-    WHERE municipality_code = ? AND last_seen < datetime('now', '-7 days')
-  `).run(municipalityCode);
+  // Remove stale listings (not seen in 7 days) — only if scrape returned results
+  if (listings.length > 0) {
+    db.prepare(`
+      DELETE FROM listings
+      WHERE municipality_code = ? AND last_seen < datetime('now', '-7 days')
+    `).run(municipalityCode);
+  }
 
   return newCount;
 }

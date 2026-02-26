@@ -6,6 +6,68 @@ const MAX_PAGES = 10; // Max pages per search (500 listings)
 const PAGE_DELAY = 1500; // ms between page requests
 const DETAIL_DELAY = 2000; // ms between detail page requests
 
+/**
+ * Decode React Router turbo-stream data from Finn.no pages.
+ * Finn.no migrated from Remix (__remixContext) to React Router (__reactRouterContext)
+ * which uses a streamed indexed-array serialization format.
+ */
+function decodeTurboStream(html) {
+  // Extract the turbo-stream payload from the enqueue call
+  const enqueueStart = html.indexOf('streamController.enqueue(');
+  if (enqueueStart === -1) return null;
+
+  const strStart = html.indexOf('"', enqueueStart + 24);
+  if (strStart === -1) return null;
+
+  // Walk the JS string to find the closing quote, respecting escapes
+  let i = strStart + 1;
+  while (i < html.length) {
+    if (html[i] === '\\') { i += 2; continue; }
+    if (html[i] === '"') break;
+    i++;
+  }
+
+  const jsString = html.slice(strStart, i + 1);
+
+  // Double-parse: first JS string unescape, then JSON array
+  const inner = JSON.parse(jsString);
+  return JSON.parse(inner);
+}
+
+/**
+ * Resolve a turbo-stream indexed reference into a plain JS object.
+ * The turbo-stream format stores data as a flat array where objects use
+ * {"_keyIndex": valueIndex} pairs referencing other positions in the array.
+ * Negative indices are special values (null/undefined).
+ */
+function resolveRef(arr, idx, depth = 0) {
+  if (depth > 15) return null;
+
+  let val;
+  if (typeof idx === 'number') {
+    if (idx < 0) return null; // -5 = undefined, -7 = null, etc.
+    val = arr[idx];
+  } else {
+    val = idx;
+  }
+
+  if (val && typeof val === 'object' && !Array.isArray(val)) {
+    const out = {};
+    for (const [k, v] of Object.entries(val)) {
+      const keyIdx = parseInt(k.replace('_', ''), 10);
+      const keyName = arr[keyIdx];
+      out[keyName] = resolveRef(arr, v, depth + 1);
+    }
+    return out;
+  }
+
+  if (Array.isArray(val)) {
+    return val.map(x => resolveRef(arr, x, depth + 1));
+  }
+
+  return val;
+}
+
 // Load Finn.no location code mapping
 let finnLocations = {};
 try {
@@ -146,21 +208,17 @@ async function scrapeSearchPage(url, municipality, hasLocationFilter, category) 
 
   const html = await resp.text();
 
-  const contextMatch = html.match(/window\.__remixContext\s*=\s*({.*?});\s*<\/script>/s);
-  if (!contextMatch) {
-    throw new Error('Could not find __remixContext data');
+  const arr = decodeTurboStream(html);
+  if (!arr) {
+    throw new Error('Could not find turbo-stream data in page');
   }
 
-  let data;
-  try {
-    data = JSON.parse(contextMatch[1]);
-  } catch (e) {
-    throw new Error('Failed to parse __remixContext JSON');
-  }
+  // Find "docs" and "paging" keys in the flat array and resolve them
+  const docsIdx = arr.indexOf('docs');
+  const pagingIdx = arr.indexOf('paging');
 
-  // Extract pagination metadata
-  const paging = findPaging(data);
-  const docs = findDocs(data);
+  const docs = docsIdx >= 0 ? resolveRef(arr, arr[docsIdx + 1]) : null;
+  const paging = pagingIdx >= 0 ? resolveRef(arr, arr[pagingIdx + 1]) : null;
 
   if (!docs || docs.length === 0) {
     return { listings: [], paging };
@@ -342,17 +400,10 @@ async function fetchPlotDetails(finnUrl) {
   if (!resp.ok) return defaults;
 
   const html = await resp.text();
-  const contextMatch = html.match(/window\.__remixContext\s*=\s*({.*?});\s*<\/script>/s);
-  if (!contextMatch) return defaults;
+  const arr = decodeTurboStream(html);
+  if (!arr) return defaults;
 
-  let data;
-  try {
-    data = JSON.parse(contextMatch[1]);
-  } catch (e) {
-    return defaults;
-  }
-
-  const ad = findAdData(data);
+  const ad = findAdData(arr);
   if (!ad) return defaults;
 
   // Extract all fields
@@ -490,75 +541,25 @@ function classifyDeveloped(facilities, utilities, fullText) {
 }
 
 /**
- * Find ad data in detail page __remixContext
+ * Find ad data in detail page turbo-stream array
  */
-function findAdData(data) {
+function findAdData(arr) {
   try {
-    const loaderData = data?.state?.loaderData;
-    if (!loaderData) return null;
+    // Find "ad" key in the flat array and resolve the object it points to
+    const adIdx = arr.indexOf('ad');
+    if (adIdx < 0) return null;
 
-    // Try plots route key first, then homes
-    for (const key of Object.keys(loaderData)) {
-      if (key.includes('_item+/')) {
-        const typed = loaderData[key]?.typedObjectData?.objectData?.ad;
-        if (typed) return typed;
-      }
-    }
-    return null;
+    // The value after "ad" key should be a reference to the ad object
+    const adRef = arr[adIdx + 1];
+    if (adRef === undefined || adRef === null) return null;
+
+    return resolveRef(arr, adRef);
   } catch (e) {
     return null;
   }
 }
 
-// --- UTILITY: Find docs array in search results ---
-
-function findDocs(obj, depth = 0) {
-  if (depth > 10 || !obj || typeof obj !== 'object') return null;
-
-  if (Array.isArray(obj)) {
-    if (obj.length > 0 && obj[0]?.ad_id) return obj;
-    for (const item of obj) {
-      const found = findDocs(item, depth + 1);
-      if (found) return found;
-    }
-    return null;
-  }
-
-  if (obj.docs && Array.isArray(obj.docs) && obj.docs.length > 0) {
-    return obj.docs;
-  }
-
-  for (const key of Object.keys(obj)) {
-    const found = findDocs(obj[key], depth + 1);
-    if (found) return found;
-  }
-
-  return null;
-}
-
-/**
- * Find pagination metadata in search results
- */
-function findPaging(obj, depth = 0) {
-  if (depth > 10 || !obj || typeof obj !== 'object') return null;
-  if (Array.isArray(obj)) {
-    for (const item of obj) {
-      const found = findPaging(item, depth + 1);
-      if (found) return found;
-    }
-    return null;
-  }
-
-  if (obj.paging && typeof obj.paging === 'object' && 'last' in obj.paging) {
-    return obj.paging;
-  }
-
-  for (const key of Object.keys(obj)) {
-    const found = findPaging(obj[key], depth + 1);
-    if (found) return found;
-  }
-
-  return null;
-}
+// Note: findDocs/findPaging no longer needed — turbo-stream decoder resolves
+// "docs" and "paging" directly by index lookup in decodeTurboStream output.
 
 module.exports = { fetchListingsForMunicipality, fetchPlotsForMunicipality };
